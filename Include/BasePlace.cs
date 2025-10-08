@@ -4,7 +4,7 @@
     {
         public string Name { get; private set; } = name;
         public List<Reviev> PlaceRevievs { get; private set; } = placeRevievs ?? [];
-        public List<Product> Menu { get; private set; } = menu ?? []; 
+        public List<Product> Menu { get; private set; } = menu ?? [];
 
         public virtual bool AddRevievs(Reviev reviev)
         {
@@ -41,12 +41,11 @@
         Appetizer
     }
 
-    class Product(string pName, double price, bool isPer100G, ProductType type, List<Reviev>? productRevievs = null)
+    class Product(string pName, double price, bool isPer100G, ProductType type)
     {
         public string PName { get; private set; } = pName;
         public double Price { get; private set; } = price;
         public bool IsPer100G { get; private set; } = isPer100G;
         public ProductType Type { get; private set; } = type;
-        public List<Reviev> ProductRevievs { get; private set; } = productRevievs ?? [];
     }
 }

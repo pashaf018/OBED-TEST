@@ -1,10 +1,9 @@
 ﻿namespace OBED.Include
 {
-    class Profile(string name, long userID, List<Reviev>? userRevievs = null)
+    class Profile(string name, long userID)
     {
         public string Name { get; private set; } = name;
         public long UserID { get; private set; } = userID;
-        public List<Reviev> UserRevievs { get; private set; } = userRevievs ?? [];
     }
 
     enum UserAction
