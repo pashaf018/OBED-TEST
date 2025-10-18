@@ -6,105 +6,152 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
-class Programm
+class Program
 {
-    static async Task Main()
-    {
-        using var cts = new CancellationTokenSource();
-        var token = Environment.GetEnvironmentVariable("TOKEN");
-        var bot = new TelegramBotClient(token!, cancellationToken: cts.Token);
-        var meBot = await bot.GetMe();
+	static async Task Main()
+	{
+		using var cts = new CancellationTokenSource();
+		var token = Environment.GetEnvironmentVariable("TOKEN");
+		var bot = new TelegramBotClient(token!, cancellationToken: cts.Token);
+		var meBot = await bot.GetMe();
 
-        // PLACEHOLDERS
-        List<Profile> profiles = [];
-        List<Canteen> canteens = [new("Вкусочка", 6, 2), new("КургерКинг", 5, 3, null, [new("craze Humburger", 99.99, false, ProductType.MainDishes), new("Cook cola", 50, true, ProductType.Drinks), new("3", 99.99, false, ProductType.SideDishes), new("4", 50, true, ProductType.Drinks),
-                                                                                        new("5", 99.99, false, ProductType.Drinks), new("6", 50, true, ProductType.SideDishes), new("7", 99.99, false, ProductType.MainDishes), new("8", 50, true, ProductType.Drinks),
-                                                                                        new("9", 99.99, false, ProductType.MainDishes), new("10", 50, true, ProductType.Drinks), new("11", 99.99, false, ProductType.SideDishes), new("12", 50, true, ProductType.MainDishes),
-                                                                                        new("MD", 99.99, false, ProductType.MainDishes), new("MD", 99.99, false, ProductType.MainDishes), new("MD", 99.99, false, ProductType.MainDishes), new("MD", 99.99, false, ProductType.MainDishes),
-                                                                                        new("MD", 99.99, false, ProductType.MainDishes), new("MD", 99.99, false, ProductType.MainDishes), new("MD", 99.99, false, ProductType.MainDishes), new("MD", 99.99, false, ProductType.MainDishes),
-                                                                                        new("MD", 99.99, false, ProductType.MainDishes), new("MD", 99.99, false, ProductType.MainDishes), new("MD", 99.99, false, ProductType.MainDishes), new("MD", 99.99, false, ProductType.MainDishes),
-                                                                                        new("MD", 99.99, false, ProductType.MainDishes), new("MD", 99.99, false, ProductType.MainDishes), new("MD", 99.99, false, ProductType.MainDishes), new("MD", 99.99, false, ProductType.MainDishes),
-                                                                                        new("MD", 99.99, false, ProductType.MainDishes), new("MD", 99.99, false, ProductType.MainDishes), new("MD", 99.99, false, ProductType.MainDishes), new("MD", 99.99, false, ProductType.MainDishes)]),
-                                  new("Башни-близняшки", 9, 11, [new(12315156, 1, "Вкусно, но не грустно"), new(12315156, 2, "Грустно, но вкусно"), new(12315156, 4, "Грустно, но вкусно"), new(12315156, 2, "Грустно, но вкусно"),
-                                                                 new(12315156, 1, "Вкусно, но не грустно"), new(12315156, 9, "Грустно, но вкусно"), new(12315156, 7, "Грустно, но вкусно"), new(12315156, 10, "Грустно, но вкусно")],
-                                  [new("Левый", 9, false, ProductType.Drinks), new("Правый", 11, true, ProductType.MainDishes)]),
-                                  new("ОБЕД, УЮТНЕНЬКО", 1, 1), new("PLACEHOLDER", 3, 3), new("Оригинальный PLACEHOLDER", 5, 1)];
-        // PLACEHOLDERS
+		// TODO: переход на SQL
 
-        Dictionary<long, UserState> usersState = []; // TODO: переход на noSQL
+		List<Product> products1 = [new("Main1", ProductType.MainDish, (50, false)), new("Side1", ProductType.SideDish, (100, false)), new("Drink1", ProductType.Drink, (150, false)), new("Appetizer1", ProductType.Appetizer, (200, false)),
+			new("Main2", ProductType.MainDish, (250, true)), new("Side2", ProductType.SideDish, (300, true)), new("Drink2", ProductType.Drink, (350, true)), new("Appetizer2", ProductType.Appetizer, (400, true)),
+			new("Main3", ProductType.MainDish, (450, false)), new("Side3", ProductType.SideDish, (500, false)), new("Drink3", ProductType.Drink, (550, false)), new("Appetizer3", ProductType.Appetizer, (600, false))];
 
-        bot.OnError += OnError;
-        bot.OnMessage += OnMessage;
-        bot.OnUpdate += OnUpdate;
+		List<Product> products2 = [new("Main1", ProductType.MainDish, (50, false)), new("Side1", ProductType.SideDish, (100, false)), new("Drink1", ProductType.Drink, (150, false))];
 
-        Console.WriteLine($"@{meBot.Username} is running... Press Enter to terminate\n");
-        Console.ReadLine();
-        cts.Cancel();
+		List<Product> products3 = [new("Main1", ProductType.MainDish, (50, false)), new("Side1", ProductType.SideDish, (100, false)), new("Drink1", ProductType.Drink, (150, false)), new("Appetizer1", ProductType.Appetizer, (200, false)),
+			new("Main2", ProductType.MainDish, (250, true))];
 
-        async Task OnError(Exception exception, HandleErrorSource source)
-        {
-            Console.WriteLine(exception);
-            await Task.Delay(2000, cts.Token);
-        }
+		List<Product> products4 = [new("Main1", ProductType.MainDish, (50, false)), new("Side1", ProductType.SideDish, (100, false)), new("Drink1", ProductType.Drink, (150, false)), new("Appetizer1", ProductType.Appetizer, (200, false)),
+			new("Main2", ProductType.MainDish, (250, true)), new("Side2", ProductType.SideDish, (300, true))];
 
-        async Task OnMessage(Message msg, UpdateType type)
-        {
-            switch (msg)
-            {
-                //case { ReplyToMessage: { } reply }:
-                //	{
-                //		break;
-                //	}
-                case { Type: { } mType }:
-                    {
-                        if (mType == MessageType.Text)
-                            if (msg.Text![0] == '/')
-                            {
-                                var splitStr = msg.Text.Split(' ');
-                                if (splitStr.Length > 1)
-                                    await OnCommand(splitStr[0].ToLower(), splitStr[1].ToLower(), msg);
-                                else
-                                    await OnCommand(splitStr[0].ToLower(), null, msg);
-                            }
+		List<Product> products5 = [new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)),
+			new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)),
+			new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false))];
 
-                        var foundUser = profiles
-                            .Where(x => x.UserID == msg.Chat.Id)
-                            .FirstOrDefault();
+		List<Review> reviews1 = [new(123456789, 10), new(123456789, 9), new(123456789, 8), new(123456789, 7), new(123456789, 6), new(123456789, 5), new(123456789, 4)];
+	
+		List<Review> reviews2 = [new(123456789, 10), new(123456789, 9), new(123456789, 8, "8"), new(123456789, 7, "7"), new(123456789, 6), new(123456789, 5, "5"), new(123456789, 4)];
 
-                        if (foundUser == null)
-                        {
-                            await bot.SendMessage(msg.Chat.Id, "Вы не прошли регистрацию путём ввода /start, большая часть функций бота недоступна",
-                                replyMarkup: new InlineKeyboardButton[] { ("Зарегистрироваться", "/start") });
-                            break;
-                        }
+		List<Review> reviews3 = [new(123456789, 7, "Old"), new(123456789, 9, "Old"), new(123456789, 5, "Old"), new(123456789, 10, "Old"), new(123456789, 6, "Old"), new(123456789, 8, "Old"), new(123456789, 4, "Old")];
+		reviews3.Add(new(987654321, 3, "New"));
 
-                        switch (usersState[foundUser.UserID].Action)
-                        {
-                            case (UserAction.RatingRequest):
-                                {
-                                    if (int.TryParse(msg.Text, out int rating) && (rating > 0 && rating < 11))
-                                    {
-                                        usersState[foundUser.UserID].Rating = rating;
-                                        usersState[foundUser.UserID].Action = UserAction.CommentRequest;
-                                        await bot.SendMessage(msg.Chat, $"Введите текст отзыва или откажитесь от сообщения отправив -", replyMarkup: new ForceReplyMarkup());
-                                        break;
-                                    }
+		ObjectLists.AddRangeList<Canteen>([new("Canteen1", 1, 1, null, reviews3, products1, null),
+			new("Canteen2", 2, 2, null, reviews2, products2, null),
+			new("Canteen3", 2, 2, null, reviews1, products3, null),
+			new("Canteen4", 2, 2, null, null, null, null),
+			new("Canteen5", 2, 2, null, null, null, null),
+			new("Canteen6", 2, 2, null, null, null, null),
+			new("Canteen7", 2, 2, null, null, null, null),
+			new("Canteen8", 2, 2, null, null, null, null),
+			new("Canteen9", 2, 2, null, null, null, null),
+			new("Canteen10", 2, 2, null, null, null, null),
+			new("Canteen11", 2, 2, null, null, null, null),
+			new("Canteen12", 2, 2, null, null, null, null),
+			new("Canteen13", 2, 2, null, null, null, null),
+			new("Canteen14", 2, 2, null, null, null, null),
+			new("Canteen15", 2, 2, null, reviews1, products5, null),
+			new("Canteen16", 3, 3, null, reviews1, products4, null)]);
+		ObjectLists.AddRangeList<Buffet>([new("Buffet1", 1, 1, null, reviews1, products1, null),
+			new("Buffet2", 2, 2, null, reviews2, products2, null),
+			new("Buffet3", 3, 3, null, reviews3, products4, null)]);
+		ObjectLists.AddRangeList<Grocery>([new("Grocery1", null, reviews1, products1, null),
+			new("Grocery2", null, reviews2, products2, null),
+			new("Grocery3", null, reviews3, products4, null)]);
 
-                                    await bot.SendMessage(msg.Chat, $"Ошибка при обработке! Убедитесь, что ваше сообщение содержит только цифры или они входят в промежуток от 1 до 10", replyMarkup: new ForceReplyMarkup());
-                                    break;
-                                }
-                            case (UserAction.CommentRequest):
-                                {
-                                    if (string.IsNullOrWhiteSpace(msg.Text))
-                                    {
-                                        await bot.SendMessage(msg.Chat, $"Ошибка при обработке! Убедитесь, что ваше сообщение содержит текст или откажитесь от сообщения отправив -", replyMarkup: new ForceReplyMarkup());
-                                        break;
-                                    }
+		reviews3.Add(new(611614145, 3, "SuperNew"));
 
-                                        usersState[foundUser.UserID].Comment = msg.Text;
+		// TODO: переход на noSQL
+		Dictionary<long, UserState> usersState = [];
 
-                                    usersState[foundUser.UserID].Action = UserAction.NoActiveRequest;
-                                    await bot.SendHtml(msg.Chat.Id, $"""
+		bot.OnError += OnError;
+		bot.OnMessage += OnMessage;
+		bot.OnUpdate += OnUpdate;
+
+		Console.WriteLine($"@{meBot.Username} is running... Press Enter to terminate\n");
+		Console.ReadLine();
+		cts.Cancel();
+
+		async Task OnError(Exception exception, HandleErrorSource source)
+		{
+			Console.WriteLine(exception);
+			await Task.Delay(2000, cts.Token);
+		}
+
+		async Task OnMessage(Message msg, UpdateType type)
+		{
+			switch (msg)
+			{
+				case { Type: { } mType }:
+					{
+						if (mType == MessageType.Text)
+							if (msg.Text![0] == '/')
+							{
+								var splitStr = msg.Text.Split(' ');
+								if (splitStr.Length > 1)
+									await OnCommand(splitStr[0].ToLower(), splitStr[1].ToLower(), msg);
+								else
+									await OnCommand(splitStr[0].ToLower(), null, msg);
+								break;
+							}
+
+						ObjectLists.Persons.TryGetValue(msg.Chat.Id, out Person? foundUser);
+
+						if (foundUser == null)
+						{
+							await bot.SendMessage(msg.Chat.Id, "Вы не прошли регистрацию путём ввода /start, большая часть функций бота недоступна",
+								replyMarkup: new InlineKeyboardButton[] { ("Зарегистрироваться", "/start") });
+							break;
+						}
+
+						switch (usersState[foundUser.UserID].Action)
+						{
+							case (UserAction.RatingRequest):
+								{
+									if (int.TryParse(msg.Text, out int rating) && (rating > 0 && rating < 11))
+									{
+										usersState[foundUser.UserID].Rating = rating;
+										usersState[foundUser.UserID].Action = UserAction.CommentRequest;
+										await bot.SendMessage(msg.Chat, $"Введите текст отзыва или откажитесь от сообщения отправив -", replyMarkup: new ForceReplyMarkup());
+										break;
+									}
+
+									await bot.SendMessage(msg.Chat, $"Ошибка при обработке! Убедитесь, что ваше сообщение содержит только цифры, также они должны входить в промежуток от 1 до 10 включительно", replyMarkup: new ForceReplyMarkup());
+									break;
+								}
+							case (UserAction.RatingChange):
+								{
+									if (int.TryParse(msg.Text, out int rating) && (rating > 0 && rating < 11))
+									{
+										usersState[foundUser.UserID].Rating = rating;
+										usersState[foundUser.UserID].Comment = "-";
+										usersState[foundUser.UserID].Action = UserAction.NoActiveChange;
+										await OnCommand("/changeReview", $"-{usersState[foundUser.UserID].ReferenceToPlace}", msg);
+										break;
+									}
+
+									await bot.SendMessage(msg.Chat, $"Ошибка при обработке! Убедитесь, что ваше сообщение содержит только цифры, также они должны входить в промежуток от 1 до 10 включительно", replyMarkup: new ForceReplyMarkup());
+									break;
+								}
+							case (UserAction.CommentRequest):
+								{
+									if (string.IsNullOrWhiteSpace(msg.Text))
+									{
+										await bot.SendMessage(msg.Chat, $"Ошибка при обработке! Убедитесь, что ваше сообщение содержит текст или откажитесь от сообщения отправив -", replyMarkup: new ForceReplyMarkup());
+										break;
+									}
+
+									if (msg.Text.Trim() == "-")
+										usersState[foundUser.UserID].Comment = null;
+									else
+										usersState[foundUser.UserID].Comment = msg.Text.Trim();
+
+									usersState[foundUser.UserID].Action = UserAction.NoActiveRequest;
+									await bot.SendHtml(msg.Chat.Id, $"""
 										Ваш отзыв:
 										
 											• Оценка: {usersState[foundUser.UserID].Rating}
@@ -112,788 +159,930 @@ class Programm
 
 										Всё верно?
 										<keyboard>
-										<button text="Да" callback="/sendreviev {usersState[foundUser.UserID].RefTo}"
+										<button text="Да" callback="/sendReview {usersState[foundUser.UserID].ReferenceToPlace}"
 										<button text="Нет" callback="callback_resetAction"
 										</keyboard>
 										""");
-                                    break;
-                                }
-                        }
-                        break;
-                    }
-            }
-        }
+									break;
+								}
+							case (UserAction.CommentChange):
+								{
+									if (string.IsNullOrWhiteSpace(msg.Text))
+									{
+										await bot.SendMessage(msg.Chat, $"Ошибка при обработке! Убедитесь, что ваше сообщение содержит текст или откажитесь от сообщения отправив -", replyMarkup: new ForceReplyMarkup());
+										break;
+									}
+									
+									if (msg.Text.Trim() == "-")
+										usersState[foundUser.UserID].Comment = null;
+									else
+										usersState[foundUser.UserID].Comment = msg.Text.Trim();
 
-        async Task OnCommand(string command, string? args, Message msg)
-        {
-            if (args == null)
-                Console.WriteLine($"NOW COMMAND {msg.Chat.Username ?? msg.Chat.FirstName + msg.Chat.LastName}: {command}");
-            else
-                Console.WriteLine($"NOW COMMAND {msg.Chat.Username ?? msg.Chat.FirstName + msg.Chat.LastName}: {command} {args}");
-            switch (command)
-            {
-                case ("/start"):
-                    {
-                        await bot.SendMessage(msg.Chat, "placeholderStart", replyMarkup: new InlineKeyboardButton[][]
-                                             {
-                                                [("Места", "/places")],
-                                                [("Профиль", "/profile")],
-                                                [("Помощь", "/help"), ("Поддержка", "/report")]
-                                             });
+									usersState[foundUser.UserID].Rating = 0;
+									usersState[foundUser.UserID].Action = UserAction.NoActiveChange;
+									await OnCommand("/changeReview", $"-{usersState[foundUser.UserID].ReferenceToPlace}", msg);
+									break;
+								}
+						}
+						break;
+					}
+			}
+		}
 
-                        if (!profiles.Select(x => x.UserID).Contains(msg.Chat.Id))
-                        {
-                            Console.WriteLine($"REG: {msg.Chat.Username ?? (msg.Chat.FirstName + msg.Chat.LastName)}");
-                            profiles.Add(new Profile(msg.Chat.Username ?? (msg.Chat.FirstName + msg.Chat.LastName), msg.Chat.Id));
-                            usersState.Add(msg.Chat.Id, new());
-                        }
-                        break;
-                    }
-                case ("/profile"):
-                    {
-                        var foundUser = profiles
-                            .Where(x => x.UserID == msg.Chat.Id)
-                            .FirstOrDefault();
+		async Task OnCommand(string command, string? args, Message msg)
+		{
+			if (args == null)
+				Console.WriteLine($"NOW COMMAND {msg.Chat.Username ?? msg.Chat.FirstName + msg.Chat.LastName}: {command}");
+			else
+				Console.WriteLine($"NOW COMMAND {msg.Chat.Username ?? msg.Chat.FirstName + msg.Chat.LastName}: {command} {args}");
+			switch (command)
+			{
+				case ("/start"):
+					{
+						await bot.SendMessage(msg.Chat, "Старт", replyMarkup: new InlineKeyboardButton[][]
+											 {
+												[("Места", "/places")],
+												[("Профиль", "/person")],
+												[("Помощь", "/help"), ("Поддержка", "/report")]
+											 });
 
-                        if (foundUser != null)
-                            await bot.SendMessage(msg.Chat, $"{foundUser.UserID} - {foundUser.Name}", replyMarkup: new InlineKeyboardButton[][]
-                                                 {
-                                                    [("Назад","/start")]
-                                                 });
-                        break;
-                    }
-                case ("/help"):
-                    {
-                        // TODO: обращение "по кусочкам" для вывода справки
-                        await bot.SendMessage(msg.Chat, "TODO");
-                        break;
-                    }
-                case ("/report"):
-                    {
-                        // TODO: Сообщать нам только о тех ошибках, которые реально мешают юзерам, а не о фантомных стикерах
-                        await bot.SendMessage(msg.Chat, "TODO");
-                        break;
-                    }
-                case ("/places"):
-                    {
-                        await bot.SendMessage(msg.Chat, "placeholderPlaces", replyMarkup: new InlineKeyboardButton[][]
-                                             {
-                                                [("Столовые", "/canteens")],
-                                                [("Буфеты/автоматы", "/buffets")],
-                                                [("Внешние магазины", "/shops")]
-                                             });
-                        break;
-                    }
-                case ("/canteens"):
-                    {
-                        int page = 0;
-                        if (args != null && !int.TryParse(args, out page))
-                        {
-                            Console.WriteLine($"{msg.Chat.Id} | Invalid command args - {msg.Text}");
-                            break;
-                        }
+						if (!ObjectLists.Persons.ContainsKey(msg.Chat.Id))
+						{
+							Console.WriteLine($"REG: {msg.Chat.Username ?? (msg.Chat.FirstName + msg.Chat.LastName)}");
+                            ObjectLists.Persons.TryAdd(msg.Chat.Id, new Person(msg.Chat.Username ?? (msg.Chat.FirstName + msg.Chat.LastName), msg.Chat.Id, RoleType.CommonUser));
+							usersState.Add(msg.Chat.Id, new());
+						}
+						break;
+					}
+				case ("/person"):
+					{
+						ObjectLists.Persons.TryGetValue(msg.Chat.Id, out Person? foundUser);
 
-                        int elemCounter = canteens.Count;
-                        if (page < 0 || page >= elemCounter)
-                            page = 0;
+						if (foundUser != null)
+							await bot.SendMessage(msg.Chat, $"{foundUser.UserID} - {foundUser.Username}", replyMarkup: new InlineKeyboardButton[][]
+												 {
+													[("Назад","/start")]
+												 });
+						break;
+					}
+				case ("/help"):
+					{
+						// TODO: обращение "по кусочкам" для вывода справки
+						await bot.SendMessage(msg.Chat, "TODO");
+						break;
+					}
+				case ("/report"):
+					{
+						// TODO: Сообщать нам только о тех ошибках, которые реально мешают юзерам, а не о фантомных стикерах
+						await bot.SendMessage(msg.Chat, "TODO");
+						break;
+					}
+				case ("/places"):
+					{
+						await bot.SendMessage(msg.Chat, "Выбор типа точек", replyMarkup: new InlineKeyboardButton[][]
+											 {
+												[("Столовые", "/placeSelector -C")],
+												[("Буфеты", "/placeSelector -B")],
+												[("Внешние магазины", "/placeSelector -G")],
+												[("Назад", "/start")]
+											 });
+						break;
+					}
+				case ("/placeSelector"):
+					{
+						if (args == null)
+						{
+							await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: /placeSelector не применяется без аргументов.", replyMarkup: new InlineKeyboardButton[]
+							{
+								("Назад", "/places")
+							});
+							throw new Exception($"No command args: {msg.Text}");
+						}
 
-                        int nowCounter = page * 5;
-                        await bot.SendMessage(msg.Chat, "placeholderCanteen", replyMarkup: new InlineKeyboardButton[][]
-                                             {
-                                                [($"{canteens[0 + nowCounter].Name}", $"/info cants{0 + nowCounter}")],
-                                                [($"{((elemCounter > (1 + nowCounter)) ? canteens[1 + nowCounter].Name : "")}", $"/info cants{1 + nowCounter}")],
-                                                [($"{((elemCounter > (2 + nowCounter)) ? canteens[2 + nowCounter].Name : "")}", $"/info cants{2 + nowCounter}")],
-                                                [($"{((elemCounter > (3 + nowCounter)) ? canteens[3 + nowCounter].Name : "")}", $"/info cants{3 + nowCounter}")],
-                                                [($"{((elemCounter > (4 + nowCounter)) ? canteens[4 + nowCounter].Name : "")}", $"/info cants{4 + nowCounter}")],
-                                                [($"{((page != 0) ? "◀️" : "")}", $"/canteens {page - 1}"), ("Назад","/places"), ($"{((elemCounter > (5 + nowCounter)) ? "▶️" : "")}", $"/canteens {page + 1}")]
-                                             });
-                        break;
-                    }
-                case ("/buffets"):
-                    {
-                        // TODO: Перенести функционал canteens
-                        await bot.SendMessage(msg.Chat, "TODO");
-                        break;
-                    }
-                case ("/shops"):
-                    {
-                        // TODO: Перенести функционал canteens
-                        await bot.SendMessage(msg.Chat, "TODO");
-                        break;
-                    }
-                case ("/info"):
-                    {
+						int page = 0;
+						if (!char.IsLetter(args[1]) || (args.Length > 2 && !int.TryParse(args[2..], out page)))
+						{
+							await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /placeSelector.", replyMarkup: new InlineKeyboardButton[]
+							{
+								("Назад", "/places")
+							});
+							throw new Exception($"Invalid command agrs: {msg.Text}");
+						}
+						if (page < 0)
+							page = 0;
+						int nowCounter = page * 5;
+
+						List<BasePlace> places;
+						switch (args[1])
+						{
+							case ('C'):
+								{
+									places = [.. ObjectLists.Canteens.Cast<BasePlace>()];
+									break;
+								}
+							case ('B'):
+								{
+									places = [.. ObjectLists.Buffets.Cast<BasePlace>()];
+									break;
+								}
+							case ('G'):
+								{
+									places = [.. ObjectLists.Groceries.Cast<BasePlace>()];
+									break;
+								}
+							default:
+								{
+									await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /placeSelector.", replyMarkup: new InlineKeyboardButton[]
+									   {
+										   ("Назад", "/places")
+									   });
+									throw new Exception($"Invalid command agrs: {msg.Text}");
+								}
+						}
+
+						bool checker = false;
+						if (places.FirstOrDefault() is ILocatedUni)
+							checker = true;
+
+                            if (args[0] != '-')
+						{
+							for (int i = 0; i < places.Count; ++i)
+							{
+								if (places[i] is ILocatedUni located && located.BuildingNumber != (args[0] - '0'))
+								{
+									places.RemoveAt(i);
+									--i;
+								}
+                            }
+						}
+
+						places = [.. places.OrderByDescending(x => x.Reviews.Sum(x => x.Rating))];
+
+						int placesCounter = places.Count;
+						await bot.SendMessage(msg.Chat, "Выбор точки", replyMarkup: new InlineKeyboardButton[][]
+											 {
+												[($"{((args[0] == '-' && checker) ? "Сортировка по корпусу" : (checker ? "Отключить сортировку" : ""))}", (args[0] == '-') ? $"/buildingNumberSelector {args[1..]}" : $"/placeSelector -{args[1]}")],
+                                                [($"{((placesCounter != 0) ? places[nowCounter].Name : "")}", $"/info {args[1]}{nowCounter}")],
+												[($"{((placesCounter > ++nowCounter) ? places[nowCounter].Name : "")}", $"/info {args[1]}{nowCounter}")],
+												[($"{((placesCounter > ++nowCounter) ? places[nowCounter].Name : "")}", $"/info {args[1]}{nowCounter}")],
+												[($"{((placesCounter > ++nowCounter) ? places[nowCounter].Name : "")}", $"/info {args[1]}{nowCounter}")],
+												[($"{((placesCounter > ++nowCounter) ? places[nowCounter].Name : "")}", $"/info {args[1]}{nowCounter}")],
+												[($"{((page != 0) ? "◀️" : "")}", $"/placeSelector {args[..2]}{page - 1}"), ("Назад","/places"), ($"{(placesCounter > nowCounter ? "▶️" : "")}", $"/placeSelector {args[..2]}{page + 1}")]
+											 });
+						break;
+					}
+				case ("/buildingNumberSelector"):
+					{
                         if (args == null)
                         {
-                            await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: /info не применяется без аргументов.", replyMarkup: new InlineKeyboardButton[]
+                            await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: /buildingNumberSelector не применяется без аргументов.", replyMarkup: new InlineKeyboardButton[]
                             {
                                 ("Назад", "/places")
                             });
                             throw new Exception($"No command args: {msg.Text}");
                         }
 
-                        switch (args![..5])
-                        {
-                            case ("cants"):
-                                {
-                                    string subArgs = args[5..];
-                                    if (!int.TryParse(subArgs, out int index) || index > canteens.Count)
-                                    {
-                                        await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /info.", replyMarkup: new InlineKeyboardButton[]
-                                        {
-                                            ("Назад", "/places")
-                                        });
-                                        throw new Exception($"Invalid command agrs: {msg.Text}");
-                                    }
+                        await bot.SendMessage(msg.Chat, "Выбор точки", replyMarkup: new InlineKeyboardButton[][]
+                                             {
+                                                [("1", $"/placeSelector 1{args[0]}"), ("2", $"/placeSelector 2{args}"), ("3", $"/placeSelector 3{args[0]}")],
+                                                [("4", $"/placeSelector 4{args[0]}"), ("5", $"/placeSelector 5{args}"), ("6", $"/placeSelector 6{args[0]}")],
+                                                [("ИАТУ", $"/placeSelector 0{args[0]}"), ("На территории кампуса", $"/placeSelector 7{args[0]}")],
+                                                [("Назад","/places")]
+                                             });
+						break;
+					}
+				case ("/info"):
+					{
+						if (args == null)
+						{
+							await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: /info не применяется без аргументов.", replyMarkup: new InlineKeyboardButton[]
+							{
+								("Назад", "/places")
+							});
+							throw new Exception($"No command args: {msg.Text}");
+						}
 
-                                    var revievsWithComment = canteens[index].PlaceRevievs.Where(x => x.Comment != null);
-                                    await bot.SendHtml(msg.Chat.Id, $"""
-											  placeholderCanteenName: {canteens[index].Name}
-											  placeholderOverageRating: TODO
-											  placeholderCaunteenCountReviev: {$"{canteens[index].PlaceRevievs.Count}"}
-											  placeholderLastReviev: {((canteens[index].PlaceRevievs.Count != 0 && revievsWithComment.Any()) ? ($"{revievsWithComment.ToList()[^1].Rating} ⭐️| {revievsWithComment.ToList()[^1].Comment}") : "Отзывы с комментариями не найдены")}
-											  <keyboard>
-											  <button text="Меню" callback="/menu {args}"
-											  </row>
-											  <row> <button text="Оставить отзыв" callback="/sendreviev {args}"
-											  <row> <button text="Отзывы" callback="/revievs {args}"
-											  </row>
-											  <row> <button text="Назад" callback="/canteens"
-											  </row>
-											  </keyboard>
-											  """);
-                                    break;
-                                }
-                            case ("bufts"):
-                                {
-                                    break;
-                                }
-                            case ("shops"):
-                                {
-                                    break;
-                                }
-                            default:
-                                {
-                                    await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /info.", replyMarkup: new InlineKeyboardButton[]
-                                        {
-                                            ("Назад", "/places")
-                                        });
-                                    throw new Exception($"Invalid command agrs: {msg.Text}");
-                                }
-                        }
-                        break;
-                    }
-                case ("/menu"):
-                    {
-                        if (args == null)
-                        {
-                            await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: /menu не применяется без аргументов.", replyMarkup: new InlineKeyboardButton[]
-                                        {
-                                            ("Назад", "/places")
-                                        });
-                            throw new Exception($"No command args: {msg.Text}");
-                        }
+						int index = 0;
+						if (!char.IsLetter(args[0]) || (args.Length > 1 && !int.TryParse(args[1..], out index)))
+						{
+							await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /info.", replyMarkup: new InlineKeyboardButton[]
+							{
+								("Назад", "/places")
+							});
+							throw new Exception($"Invalid command agrs: {msg.Text}");
+						}
 
-                        ProductType? productType = null;
-                        bool checkUnderscore = false;
-                        int posUnderscore = 0, sortCorrector = 0; // sortCorrector увеличивает "рамки" поиска на 2, дабы избежать сдвигов из-за буквы сортировки
-                        for (int i = 0; i < args.Length; ++i)     // На 2, т.к. включаем ключевую букву F как возможность для расширения, мб в будущем будет больше сортировок
-                        {
-                            if (args[i] == '_')
-                            {
-                                posUnderscore = i;
-                                checkUnderscore = true;
-                                break;
-                            }
-                            if (char.IsUpper(args[i]))
-                            {
-                                switch (args[i])
-                                {
-                                    case ('M'):
-                                        {
-                                            sortCorrector = 2;
-                                            productType = ProductType.MainDishes;
-                                            break;
-                                        }
-                                    case ('S'):
-                                        {
-                                            sortCorrector = 2;
-                                            productType = ProductType.SideDishes;
-                                            break;
-                                        }
-                                    case ('D'):
-                                        {
-                                            sortCorrector = 2;
-                                            productType = ProductType.Drinks;
-                                            break;
-                                        }
-                                    case ('A'):
-                                        {
-                                            sortCorrector = 2;
-                                            productType = ProductType.Appetizer;
-                                            break;
-                                        }
-                                    case ('F'): // Заглушка, дабы не вызвать ошибку
-                                        {
-                                            break;
-                                        }
-                                    default:
-                                        {
-                                            await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /menu.", replyMarkup: new InlineKeyboardButton[]
-                                                {
-                                                    ("Назад", "/places")
-                                                });
-                                            throw new Exception($"Invalid command agrs: {msg.Text}");
-                                        }
-                                }
-                            }
-                        }
+						BasePlace place;
+						switch (args[0])
+						{
+							case ('C'):
+								{
+									place = ObjectLists.Canteens.ElementAt(index);
+									break;
+								}
+							case ('B'):
+								{
+									place = ObjectLists.Buffets.ElementAt(index);
+									break;
+								}
+							case ('G'):
+								{
+									place = ObjectLists.Groceries.ElementAt(index);
+									break;
+								}
+							default:
+								{
+									await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /info.", replyMarkup: new InlineKeyboardButton[]
+									   {
+										   ("Назад", "/places")
+									   });
+									throw new Exception($"Invalid command agrs: {msg.Text}");
+								}
+						}
 
-                        switch (args[..5])
-                        {
-                            case ("cants"):
-                                {
-                                    int page = 0, index = 0;
-                                    if (checkUnderscore)
-                                    {
-                                        if (!int.TryParse(args[5..(posUnderscore - sortCorrector)], out index) || index > canteens.Count)
-                                        {
-                                            await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /menu.", replyMarkup: new InlineKeyboardButton[]
-                                                {
-                                                    ("Назад", "/places")
-                                                });
-                                            throw new Exception($"Invalid command agrs: {msg.Text}");
-                                        }
-                                        if (!int.TryParse(args[(posUnderscore + 1)..], out page))
-                                        {
-                                            await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /menu.", replyMarkup: new InlineKeyboardButton[]
-                                                {
-                                                    ("Назад", "/places")
-                                                });
-                                            throw new Exception($"Invalid command agrs: {msg.Text}");
-                                        }
-                                        if (page < 0 || page >= canteens[index].Menu.Count)
-                                            page = 0;
-                                    }
-                                    else
-                                    {
-                                        if (!int.TryParse(args[5..(args.Length - sortCorrector)], out index) || index > canteens.Count)
-                                        {
-                                            await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /menu.", replyMarkup: new InlineKeyboardButton[]
-                                                {
-                                                    ("Назад", "/places")
-                                                });
-                                            throw new Exception($"Invalid command agrs: {msg.Text}");
-                                        }
-                                    }
-                                    int nowCounter = page * 20;
+                        await bot.SendHtml(msg.Chat.Id, $"""
+							Название: {place.Name}
+							Средний рейтинг: {(place.Reviews.Count != 0 ? $"{Math.Round((double)place.Reviews.Sum(x => x.Rating) / place.Reviews.Count, 2)}⭐" : "Отзывы не найдены")}
+							Всего отзывов: {place.Reviews.Count}
+							Последний текстовый отзыв: {((place.Reviews.Count != 0 && place.Reviews.Where(x => x.Comment != null).Any()) ? ($"{place.Reviews.Where(x => x.Comment != null).Last().Rating} ⭐️| {place.Reviews.Where(x => x.Comment != null).Last().Comment}") : "Отзывы с комментариями не найдены")}
+							<keyboard>
+							<button text="Меню" callback="/menu -{args}"
+							</row>
+							<row> <button text="Оставить отзыв" callback="/sendReview {args}"
+							<row> <button text="Отзывы" callback="/reviews N{args}"
+							</row>
+							<row> <button text="Назад" callback="/placeSelector -{args[0]}{index / 5}"
+							</row>
+							</keyboard>
+							""");
+						break;
+					}
+				case ("/menu"):
+					{
+						if (args == null)
+						{
+							await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: /menu не применяется без аргументов.", replyMarkup: new InlineKeyboardButton[]
+							{
+								("Назад", "/places")
+							});
+							throw new Exception($"No command args: {msg.Text}");
+						}
 
-                                    var sortedCanteens = canteens[index].Menu;
-                                    if (sortCorrector != 0)
-                                    {
-                                        sortedCanteens = [.. canteens[index].Menu.Where(x => x.Type == productType)];
-                                    }
+						int index = 0, page = 0;
+						if (args.Contains('_'))
+						{
+							if (!char.IsLetter(args[1]) || (args.Length > 2 && !int.TryParse(args[2..args.IndexOf('_')], out index)) || !int.TryParse(args[(args.IndexOf('_') + 1)..], out page))
+							{
+								await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /menu.", replyMarkup: new InlineKeyboardButton[]
+									{
+									("Назад", "/places")
+									});
+								throw new Exception($"Invalid command agrs: {msg.Text}");
+							}
+						}
+						else if (!char.IsLetter(args[1]) || (args.Length > 2 && !int.TryParse(args[2..], out index)))
+						{
+							Console.WriteLine(args[2..]);
+							await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /menu.", replyMarkup: new InlineKeyboardButton[]
+							{
+								("Назад", "/places")
+							});
+							throw new Exception($"Invalid command agrs: {msg.Text}");
+						}
 
-                                    await bot.SendHtml(msg.Chat.Id, $"""
-                                    	placeholderCanteenMenu: {canteens[index].Name}
-                                    	placeholderCaunteenCountMenu: {$"{canteens[index].Menu.Count}"}
-                                    	{(productType != null ? $"placeholderCaunteenSortMod: {productType}" : "")}
-                                    	{(sortedCanteens.Count > (0 + nowCounter) ? $"{sortedCanteens[0 + nowCounter].PName} | {sortedCanteens[0 + nowCounter].Price} за {(sortedCanteens[0 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : $"Позиций по тегу {productType} не обнаружены.")}
-                                    	{(sortedCanteens.Count > (1 + nowCounter) ? $"{sortedCanteens[1 + nowCounter].PName} | {sortedCanteens[1 + nowCounter].Price} за {(sortedCanteens[1 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (2 + nowCounter) ? $"{sortedCanteens[2 + nowCounter].PName} | {sortedCanteens[2 + nowCounter].Price} за {(sortedCanteens[2 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (3 + nowCounter) ? $"{sortedCanteens[3 + nowCounter].PName} | {sortedCanteens[3 + nowCounter].Price} за {(sortedCanteens[3 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (4 + nowCounter) ? $"{sortedCanteens[4 + nowCounter].PName} | {sortedCanteens[4 + nowCounter].Price} за {(sortedCanteens[4 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (5 + nowCounter) ? $"{sortedCanteens[5 + nowCounter].PName} | {sortedCanteens[5 + nowCounter].Price} за {(sortedCanteens[5 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (6 + nowCounter) ? $"{sortedCanteens[6 + nowCounter].PName} | {sortedCanteens[6 + nowCounter].Price} за {(sortedCanteens[6 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (7 + nowCounter) ? $"{sortedCanteens[7 + nowCounter].PName} | {sortedCanteens[7 + nowCounter].Price} за {(sortedCanteens[7 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (8 + nowCounter) ? $"{sortedCanteens[8 + nowCounter].PName} | {sortedCanteens[8 + nowCounter].Price} за {(sortedCanteens[8 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (9 + nowCounter) ? $"{sortedCanteens[9 + nowCounter].PName} | {sortedCanteens[9 + nowCounter].Price} за {(sortedCanteens[9 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (10 + nowCounter) ? $"{sortedCanteens[10 + nowCounter].PName} | {sortedCanteens[10 + nowCounter].Price} за {(sortedCanteens[10 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (11 + nowCounter) ? $"{sortedCanteens[11 + nowCounter].PName} | {sortedCanteens[11 + nowCounter].Price} за {(sortedCanteens[11 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (12 + nowCounter) ? $"{sortedCanteens[12 + nowCounter].PName} | {sortedCanteens[12 + nowCounter].Price} за {(sortedCanteens[12 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (13 + nowCounter) ? $"{sortedCanteens[13 + nowCounter].PName} | {sortedCanteens[13 + nowCounter].Price} за {(sortedCanteens[13 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (14 + nowCounter) ? $"{sortedCanteens[14 + nowCounter].PName} | {sortedCanteens[14 + nowCounter].Price} за {(sortedCanteens[14 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (15 + nowCounter) ? $"{sortedCanteens[15 + nowCounter].PName} | {sortedCanteens[15 + nowCounter].Price} за {(sortedCanteens[15 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (16 + nowCounter) ? $"{sortedCanteens[16 + nowCounter].PName} | {sortedCanteens[16 + nowCounter].Price} за {(sortedCanteens[16 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (17 + nowCounter) ? $"{sortedCanteens[17 + nowCounter].PName} | {sortedCanteens[17 + nowCounter].Price} за {(sortedCanteens[17 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (18 + nowCounter) ? $"{sortedCanteens[18 + nowCounter].PName} | {sortedCanteens[18 + nowCounter].Price} за {(sortedCanteens[18 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	{(sortedCanteens.Count > (19 + nowCounter) ? $"{sortedCanteens[19 + nowCounter].PName} | {sortedCanteens[19 + nowCounter].Price} за {(sortedCanteens[19 + nowCounter].IsPer100G ? "100 грамм" : "порцию")}" : "")}
-                                    	<keyboard>
-                                    	</row>
-                                    	<row><button text="{(canteens[index].Menu.Where(x => x.Type == ProductType.MainDishes).Any() ? "Блюда" : "")}" callback="/menu {args[..5] + index.ToString()}FM"
-                                    	<row><button text="{(canteens[index].Menu.Where(x => x.Type == ProductType.SideDishes).Any() ? "Гарниры" : "")}" callback="/menu {args[..5] + index.ToString()}FS"
-                                    	<row><button text="{(canteens[index].Menu.Where(x => x.Type == ProductType.Drinks).Any() ? "Напитки" : "")}" callback="/menu {args[..5] + index.ToString()}FD"
-                                    	<row><button text="{(canteens[index].Menu.Where(x => x.Type == ProductType.Appetizer).Any() ? "Десерты" : "")}" callback="/menu {args[..5] + index.ToString()}FA"
-                                    	</row>
-                                    	<row><button text="{((nowCounter != 0) ? "◀️" : "")}" callback="/menu {(posUnderscore == 0 ? $"{args}_{page - 1}" : $"{args[..posUnderscore]}_{page - 1}")}"
-                                    	<row><button text="Назад" callback="/info {args[..5] + index.ToString()}"
-                                    	<row><button text="{(sortedCanteens.Count > (20 + nowCounter) ? "▶️" : "")}" callback="/menu {(posUnderscore == 0 ? $"{args}_{page + 1}" : $"{args[..posUnderscore]}_{page + 1}")}"
-                                    	</row>
-                                    	</keyboard>
-                                    	""");
-                                    break;
-                                }
-                            case ("bufts"):
-                                {
-                                    break;
-                                }
-                            case ("shops"):
-                                {
-                                    break;
-                                }
-                            default:
-                                {
-                                    await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /menu.", replyMarkup: new InlineKeyboardButton[]
-                                                {
-                                                    ("Назад", "/places")
-                                                });
-                                    throw new Exception($"Invalid command agrs: {msg.Text}");
-                                }
-                        }
-                        break;
-                    }
-                case ("/revievs"):
-                    {
-                        if (args == null)
-                        {
-                            await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: /revievs не применяется без аргументов.", replyMarkup: new InlineKeyboardButton[]
-                                        {
-                                            ("Назад", "/places")
-                                        });
-                            throw new Exception($"No command args: {msg.Text}");
-                        }
+						if (page < 0)
+							page = 0;
+						int nowCounter = page * 10;
 
-                        char? modeSelector = null;
-                        bool checkUnderscore = false;
-                        int posUnderscore = 0, sortCorrector = 0; // sortCorrector увеличивает "рамки" поиска на 2, дабы избежать сдвигов из-за буквы сортировки
-                        for (int i = 0; i < args.Length; ++i)     // На 2, т.к. включаем ключевую букву F как возможность для расширения, мб в будущем будет больше сортировок
-                        {
-                            if (args[i] == '_')
-                            {
-                                posUnderscore = i;
-                                checkUnderscore = true;
-                                break;
-                            }
-                            if (char.IsUpper(args[i]))
-                            {
-                                switch (args[i])
-                                {
-                                    case ('H'): // Высокий рейтинг
-                                        {
-                                            modeSelector = 'H';
-                                            sortCorrector = 2;
-                                            break;
-                                        }
-                                    case ('L'): // Низкий рейтинг
-                                        {
-                                            modeSelector = 'L';
-                                            sortCorrector = 2;
-                                            break;
-                                        }
-                                    case ('F'): // Заглушка, дабы не вызвать ошибку
-                                        {
-                                            break;
-                                        }
-                                    default:
-                                        {
-                                            await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /revievs.", replyMarkup: new InlineKeyboardButton[]
-                                                {
-                                                    ("Назад", "/places")
-                                                });
-                                            throw new Exception($"Invalid command agrs: {msg.Text}");
-                                        }
-                                }
-                            }
-                        }
+						string placeName;
+						List<Product> menu;
+						switch (args[1])
+						{
+							case ('C'):
+								{
+									placeName = ObjectLists.Canteens.ElementAt(index).Name;
+									menu = ObjectLists.Canteens.ElementAt(index).Menu;
+									break;
+								}
+							case ('B'):
+								{
+									placeName = ObjectLists.Buffets.ElementAt(index).Name;
+									menu = ObjectLists.Buffets.ElementAt(index).Menu;
+									break;
+								}
+							case ('G'):
+								{
+									placeName = ObjectLists.Groceries.ElementAt(index).Name;
+									menu = ObjectLists.Groceries.ElementAt(index).Menu;
+									break;
+								}
+							default:
+								{
+									await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /menu.", replyMarkup: new InlineKeyboardButton[]
+									   {
+										   ("Назад", "/places")
+									   });
+									throw new Exception($"Invalid command agrs: {msg.Text}");
+								}
+						}
 
-                        switch (args[..5])
-                        {
-                            case ("cants"):
-                                {
-                                    int page = 0, index = 0;
-                                    if (checkUnderscore)
-                                    {
-                                        if (!int.TryParse(args[5..(posUnderscore - sortCorrector)], out index) || index > canteens.Count)
-                                        {
-                                            await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /revievs.", replyMarkup: new InlineKeyboardButton[]
-                                                {
-                                                    ("Назад", "/places")
-                                                });
-                                            throw new Exception($"Invalid command agrs: {msg.Text}");
-                                        }
-                                        if (!int.TryParse(args[(posUnderscore + 1)..], out page))
-                                        {
-                                            await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /revievs.", replyMarkup: new InlineKeyboardButton[]
-                                                {
-                                                    ("Назад", "/places")
-                                                });
-                                            throw new Exception($"Invalid command agrs: {msg.Text}");
-                                        }
-                                        if (page < 0 || page >= canteens[index].Menu.Count)
-                                            page = 0;
-                                    }
-                                    else
-                                    {
-                                        if (!int.TryParse(args[5..(args.Length - sortCorrector)], out index) || index > canteens.Count)
-                                        {
-                                            await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /revievs.", replyMarkup: new InlineKeyboardButton[]
-                                                {
-                                                    ("Назад", "/places")
-                                                });
-                                            throw new Exception($"Invalid command agrs: {msg.Text}");
-                                        }
-                                    }
-                                    int nowCounter = page * 5;
+						ProductType? productType = null;
+						switch (args[0])
+						{
+							case ('M'):
+								{
+									productType = ProductType.MainDish;
+									menu = [.. menu.Where(x => x.Type == ProductType.MainDish)];
+									break;
+								}
+							case ('S'):
+								{
+									productType = ProductType.SideDish;
+									menu = [.. menu.Where(x => x.Type == ProductType.SideDish)];
+									break;
+								}
+							case ('D'):
+								{
+									productType = ProductType.Drink;
+									menu = [..menu.Where(x => x.Type == ProductType.Drink)];
+									break;
+								}
+							case ('A'):
+								{
+									productType = ProductType.Appetizer;
+									menu = [..menu.Where(x => x.Type == ProductType.Appetizer)];
+									break;
+								}
+						}
 
-                                    var sortedRevievs = canteens[index].PlaceRevievs
-                                                    .Select(x => new
-                                                    {
-                                                        x.Rating,
-                                                        x.Comment
-                                                    })
-                                                    .Reverse()
-                                                    .ToList();
-                                    switch (modeSelector)
-                                    {
-                                        case ('H'):
-                                            {
-                                                sortedRevievs = [.. sortedRevievs.OrderBy(x => x.Rating).Reverse()];
-                                                break;
-                                            }
-                                        case ('L'):
-                                            {
-                                                sortedRevievs = [.. sortedRevievs.OrderBy(x => x.Rating)];
-                                                break;
-                                            }
-                                    }
+						await bot.SendHtml(msg.Chat.Id, $"""
+										Название: {placeName}
+										Всего позиций: {$"{menu.Count}"}
+										{(productType != null ? $"Режим сортировки: {productType}\n" : "")}
+										{(menu.Count > nowCounter ? $"{menu[nowCounter].Name} | {menu[nowCounter].Price.value} за {(menu[nowCounter].Price.perGram ? "100 грамм" : "порцию")}" : $"{(productType == null ? $"Меню у {placeName} не обнаружено" : $"Позиций по тегу {productType} не обнаружено")}")}
+										{(menu.Count > ++nowCounter ? $"{menu[nowCounter].Name} | {menu[nowCounter].Price.value} за {(menu[nowCounter].Price.perGram ? "100 грамм" : "порцию")}" : "")}
+										{(menu.Count > ++nowCounter ? $"{menu[nowCounter].Name} | {menu[nowCounter].Price.value} за {(menu[nowCounter].Price.perGram ? "100 грамм" : "порцию")}" : "")}
+										{(menu.Count > ++nowCounter ? $"{menu[nowCounter].Name} | {menu[nowCounter].Price.value} за {(menu[nowCounter].Price.perGram ? "100 грамм" : "порцию")}" : "")}
+										{(menu.Count > ++nowCounter ? $"{menu[nowCounter].Name} | {menu[nowCounter].Price.value} за {(menu[nowCounter].Price.perGram ? "100 грамм" : "порцию")}" : "")}
+										{(menu.Count > ++nowCounter ? $"{menu[nowCounter].Name} | {menu[nowCounter].Price.value} за {(menu[nowCounter].Price.perGram ? "100 грамм" : "порцию")}" : "")}
+										{(menu.Count > ++nowCounter ? $"{menu[nowCounter].Name} | {menu[nowCounter].Price.value} за {(menu[nowCounter].Price.perGram ? "100 грамм" : "порцию")}" : "")}
+										{(menu.Count > ++nowCounter ? $"{menu[nowCounter].Name} | {menu[nowCounter].Price.value} за {(menu[nowCounter].Price.perGram ? "100 грамм" : "порцию")}" : "")}
+										{(menu.Count > ++nowCounter ? $"{menu[nowCounter].Name} | {menu[nowCounter].Price.value} за {(menu[nowCounter].Price.perGram ? "100 грамм" : "порцию")}" : "")}
+										{(menu.Count > ++nowCounter ? $"{menu[nowCounter].Name} | {menu[nowCounter].Price.value} за {(menu[nowCounter].Price.perGram ? "100 грамм" : "порцию")}" : "")}
+										<keyboard>
+										</row>
+										<row><button text="{(productType == null ? "" : "Без сортировки")}" callback="/menu -{args[1]}{index}"
+										</row>
+										<row><button text="{(productType == ProductType.MainDish ? "" : "Блюда")}" callback="/menu M{args[1]}{index}"
+										<row><button text="{(productType == ProductType.SideDish ? "" : "Гарниры")}" callback="/menu S{args[1]}{index}"
+										<row><button text="{(productType == ProductType.Drink ? "" : "Напитки")}" callback="/menu D{args[1]}{index}"
+										<row><button text="{(productType == ProductType.Appetizer ? "" : "Закуски")}" callback="/menu A{args[1]}{index}"
+										</row>
+										<row><button text="{((page != 0) ? "◀️" : "")}" callback="/menu {args[..2]}{index}_{page - 1}"
+										<row><button text="Назад" callback="/info {args[1]}{index}"
+										<row><button text="{(menu.Count > ++nowCounter ? "▶️" : "")}" callback="/menu {args[..2]}{index}_{page + 1}"
+										</row>
+										</keyboard>
+										""");
+						break;
+					}
+				case ("/reviews"):
+					{
+						if (args == null)
+						{
+							await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: /reviews не применяется без аргументов.", replyMarkup: new InlineKeyboardButton[]
+							{
+								("Назад", "/places")
+							});
+							throw new Exception($"No command args: {msg.Text}");
+						}
 
-                                    await bot.SendHtml(msg.Chat.Id, $"""
-													placeholderCanteenReviev: {canteens[index].Name}
-													placeholderOverageRating: TODO
-													placeholderCaunteenCountReviev: {$"{canteens[index].PlaceRevievs.Count}"}
-													placeholderCaunteenCountRevievWithComment: {$"{canteens[index].PlaceRevievs.Where(x => x.Comment != null).Count()}"}
+						int index = 0, page = 0;
+						if (args.Contains('_'))
+						{
+							if (!char.IsLetter(args[1]) || (args.Length > 2 && !int.TryParse(args[2..args.IndexOf('_')], out index)) || !int.TryParse(args[(args.IndexOf('_') + 1)..], out page))
+							{
+								await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /reviews.", replyMarkup: new InlineKeyboardButton[]
+									{
+									("Назад", "/places")
+									});
+								throw new Exception($"Invalid command agrs: {msg.Text}");
+							}
+						}
+						else if (!char.IsLetter(args[1]) || (args.Length > 2 && !int.TryParse(args[2..], out index)))
+						{
+							Console.WriteLine(args[2..]);
+							await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /reviews.", replyMarkup: new InlineKeyboardButton[]
+							{
+								("Назад", "/places")
+							});
+							throw new Exception($"Invalid command agrs: {msg.Text}");
+						}
 
-													{((sortedRevievs.Count > (0 + nowCounter) && sortedRevievs[0 + nowCounter].Comment != null) ? $"{sortedRevievs[0 + nowCounter].Rating}⭐️| {sortedRevievs[0 + nowCounter].Comment}" : "Отзывы с комментариями не найдены.")}
-													{((sortedRevievs.Count > (1 + nowCounter) && sortedRevievs[1 + nowCounter].Comment != null) ? $"{sortedRevievs[1 + nowCounter].Rating}⭐️| {sortedRevievs[1 + nowCounter].Comment}" : "")}
-													{((sortedRevievs.Count > (2 + nowCounter) && sortedRevievs[2 + nowCounter].Comment != null) ? $"{sortedRevievs[2 + nowCounter].Rating}⭐️| {sortedRevievs[2 + nowCounter].Comment}" : "")}
-													{((sortedRevievs.Count > (3 + nowCounter) && sortedRevievs[3 + nowCounter].Comment != null) ? $"{sortedRevievs[3 + nowCounter].Rating}⭐️| {sortedRevievs[3 + nowCounter].Comment}" : "")}
-													{((sortedRevievs.Count > (4 + nowCounter) && sortedRevievs[4 + nowCounter].Comment != null) ? $"{sortedRevievs[4 + nowCounter].Rating}⭐️| {sortedRevievs[4 + nowCounter].Comment}" : "")}
-													<keyboard>
-													</row>
-													<row><button text="{((sortedRevievs.Count > 1 && modeSelector != null) ? "Без сортировки" : "")}" callback="/revievs {args[..5] + index.ToString()}"
-													<row><button text="{((sortedRevievs.Count > 1 && modeSelector != 'H') ? "Оценка ↑" : "")}" callback="/revievs {args[..5] + index.ToString()}FH"
-													<row><button text="{((sortedRevievs.Count > 1 && modeSelector != 'L') ? "Оценка ↓" : "")}" callback="/revievs {args[..5] + index.ToString()}FL"
-													</row>
-													<row><button text="{((nowCounter != 0) ? "◀️" : "")}" callback="/revievs {(posUnderscore == 0 ? $"{args}_{page - 1}" : $"{args[..posUnderscore]}_{page - 1}")}"
-													<row><button text="Назад" callback="/info {args[..5] + index.ToString()}"
-													<row><button text="{(sortedRevievs.Count > (5 + nowCounter) ? "▶️" : "")}" callback="/revievs {(posUnderscore == 0 ? $"{args}_{page + 1}" : $"{args[..posUnderscore]}_{page + 1}")}"
-													</row>
-													</keyboard>
-													""");
-                                    break;
-                                }
-                            case ("bufts"):
-                                {
-                                    await bot.SendMessage(msg.Chat.Id, "TODO");
-                                    break;
-                                }
-                            case ("shops"):
-                                {
-                                    await bot.SendMessage(msg.Chat.Id, "TODO");
-                                    break;
-                                }
-                            default:
-                                {
-                                    await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /revievs.", replyMarkup: new InlineKeyboardButton[]
-                                                {
-                                                    ("Назад", "/places")
-                                                });
-                                    throw new Exception($"Invalid command agrs: {msg.Text}");
-                                }
-                        }
+						if (page < 0)
+							page = 0;
+						int nowCounter = page * 5;
 
-                        break;
-                    }
-                case ("/sendreviev"):
-                    {
-                        if (args == null)
-                        {
-                            await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: /sendreviev не применяется без аргументов.", replyMarkup: new InlineKeyboardButton[]
-                                {
-                                ("Назад", "/places")
-                                });
-                            throw new Exception($"No command agrs: {msg.Text}");
-                        }
+						string placeName;
+						List<Review> reviews;
+						switch (args[1])
+						{
+							case ('C'):
+								{
+									placeName = ObjectLists.Canteens.ElementAt(index).Name;
+									reviews = ObjectLists.Canteens.ElementAt(index).Reviews;
+									break;
+								}
+							case ('B'):
+								{
+									placeName = ObjectLists.Buffets.ElementAt(index).Name;
+									reviews = ObjectLists.Buffets.ElementAt(index).Reviews;
+									break;
+								}
+							case ('G'):
+								{
+									placeName = ObjectLists.Groceries.ElementAt(index).Name;
+									reviews = ObjectLists.Groceries.ElementAt(index).Reviews;
+									break;
+								}
+							default:
+								{
+									await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /reviews.", replyMarkup: new InlineKeyboardButton[]
+									   {
+										   ("Назад", "/places")
+									   });
+									throw new Exception($"Invalid command agrs: {msg.Text}");
+								}
+						}
 
-                        var foundUser = profiles
-                            .Where(x => x.UserID == msg.Chat.Id)
-                            .FirstOrDefault();
+						int reviewCounter = reviews.Count;
+						reviews = [..reviews.Where(x => x.Comment != null)];
 
-                        if (foundUser == null)
-                        {
-                            await bot.SendMessage(msg.Chat.Id, "Вы не прошли регистрацию путём ввода /start, большая часть функций бота недоступна",
-                                replyMarkup: new InlineKeyboardButton[] { ("Зарегистрироваться", "/start") });
-                            break;
-                        }
+						ReviewSort? sortType = null;
+						switch (args[0])
+						{
+							case ('U'):
+								{
+									sortType = ReviewSort.Upper;
+									reviews = [.. reviews.OrderByDescending(x => x.Rating)];
+									break;
+								}
+							case ('L'):
+								{
+									sortType = ReviewSort.Lower;
+									reviews = [.. reviews.OrderBy(x => x.Rating)];
+									break;
+								}
+							case ('N'):
+								{
+									sortType = ReviewSort.NewDate;
+									reviews = [.. reviews.OrderByDescending(x => x.Date)];
+									break;
+								}
+							case ('O'):
+								{
+									sortType = ReviewSort.OldDate;
+									reviews = [.. reviews.OrderBy(x => x.Date)];
+									break;
+								}
+						}
 
-                        switch (args[..5])
-                        {
-                            case ("cants"):
-                                {
-                                    if (!int.TryParse(args[5..args.Length], out int index) || index > canteens.Count)
-                                    {
-                                        await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /sendreviev.", replyMarkup: new InlineKeyboardButton[]
-                                            {
-                                            ("Назад", "/places")
-                                            });
-                                        throw new Exception($"Invalid command agrs: {msg.Text}");
-                                    }
+						await bot.SendHtml(msg.Chat.Id, $"""
+										Название: {placeName}
+										Всего отзывов: {$"{reviewCounter}"}
+										Всего отзывов с комментариями: {$"{reviews.Count}"}
+										{(sortType != null ? $"Режим сортировки: {sortType}\n" : "")}
+										{(reviews.Count > nowCounter ? $"{reviews[nowCounter].Rating}⭐ | {reviews[nowCounter].Comment}" : $"{(sortType == null ? $"Развёрнутые отзывы на {placeName} не обнаружено" : $"Развёрнутых отзывов по тегу {sortType} не обнаружено")}")}
+										{(reviews.Count > ++nowCounter ? $"{reviews[nowCounter].Rating}⭐ | {reviews[nowCounter].Comment}" : "")}
+										{(reviews.Count > ++nowCounter ? $"{reviews[nowCounter].Rating}⭐ | {reviews[nowCounter].Comment}" : "")}
+										{(reviews.Count > ++nowCounter ? $"{reviews[nowCounter].Rating}⭐ | {reviews[nowCounter].Comment}" : "")}
+										{(reviews.Count > ++nowCounter ? $"{reviews[nowCounter].Rating}⭐ | {reviews[nowCounter].Comment}" : "")}
+										<keyboard>
+										</row>
+										<row><button text="{(sortType == ReviewSort.Upper ? "" : "Оценка ↑")}" callback="/reviews U{args[1]}{index}"
+										<row><button text="{(sortType == ReviewSort.Lower ? "" : "Оценка ↓")}" callback="/reviews L{args[1]}{index}"
+										</row>
+										<row><button text="{(sortType == ReviewSort.NewDate ? "" : "Новые")}" callback="/reviews N{args[1]}{index}"
+										<row><button text="{(sortType == ReviewSort.OldDate ? "" : "Старые")}" callback="/reviews O{args[1]}{index}"
+										</row>
+										<row><button text="{((page != 0) ? "◀️" : "")}" callback="/reviews {args[..2]}{index}_{page - 1}"
+										<row><button text="Назад" callback="/info {args[1]}{index}"
+										<row><button text="{(reviews.Count > ++nowCounter ? "▶️" : "")}" callback="/reviews {args[..2]}{index}_{page + 1}"
+										</row>
+										</keyboard>
+										""");
+						break;
+					}
+				case ("/sendReview"):
+					{
+						if (args == null)
+						{
+							await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: /sendReview не применяется без аргументов.", replyMarkup: new InlineKeyboardButton[]
+							{
+								("Назад", "/places")
+							});
+							throw new Exception($"No command args: {msg.Text}");
+						}
 
-                                    if (canteens[index].PlaceRevievs.Where(x => x.FromID == foundUser.UserID).Any())
-                                        await bot.SendHtml(msg.Chat.Id, $"""
-														Вы уже оставили отзыв на {canteens[index].Name}
+						ObjectLists.Persons.TryGetValue(msg.Chat.Id, out Person? foundUser);
 
-														• Оценка: {usersState[foundUser.UserID].Rating}
-														• Комментарий: {usersState[foundUser.UserID].Comment ?? "Отсутствует"}
+						if (foundUser == null)
+						{
+							await bot.SendMessage(msg.Chat.Id, "Вы не прошли регистрацию путём ввода /start, большая часть функций бота недоступна",
+								replyMarkup: new InlineKeyboardButton[] { ("Зарегистрироваться", "/start") });
+							break;
+						}
 
-														<keyboard>
-														</row>
-														<row><button text="Изменить" callback="/deletereviev {args[..5] + index.ToString()}_"
-														<row><button text="Удалить" callback="/deletereviev {args[..5] + index.ToString()}"
-														</row>
-														<row><button text="Назад" callback="/info {args[..5] + index.ToString()}"
-														</row>
-														</keyboard>
-														"""); // _ у изменить в конце обозначает "модификатор" запроса, но т.к. он может быть один, то нет дальнейшего пояснения
-                                    else
-                                        switch (usersState[foundUser.UserID].Action)
-                                        {
-                                            case (null):
-                                                {
-                                                    usersState[foundUser.UserID].Action = UserAction.RatingRequest;
-                                                    usersState[foundUser.UserID].RefTo = args[..5] + index.ToString();
+						int index = 0;
+						if (!char.IsLetter(args[0]) || (args.Length > 1 && !int.TryParse(args[1..], out index)))
+						{
+							await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /sendReview.", replyMarkup: new InlineKeyboardButton[]
+							{
+								("Назад", "/places")
+							});
+							throw new Exception($"Invalid command agrs: {msg.Text}");
+						}
 
-                                                    await bot.SendMessage(msg.Chat, $"Введите оценку от 1⭐️ до 10⭐️", replyMarkup: new ForceReplyMarkup());
-                                                    break;
-                                                }
-                                            case (UserAction.RatingRequest):
-                                                {
-                                                    if (usersState[foundUser.UserID].RefTo != args[..5] + index.ToString())
-                                                    {
-                                                        await bot.SendMessage(msg.Chat, $"Зафиксирована попытка оставить отзыв на другую точку. Сброс ранее введённой информации...");
-                                                        usersState[foundUser.UserID].Action = null;
-                                                        await OnCommand("/sendreviev", args[..5] + index.ToString(), msg);
-                                                    }
-                                                    break;
-                                                }
-                                            case (UserAction.CommentRequest):
-                                                {
-                                                    if (usersState[foundUser.UserID].RefTo != args[..5] + index.ToString())
-                                                    {
-                                                        await bot.SendMessage(msg.Chat, $"Зафиксирована попытка оставить отзыв на другую точку. Сброс ранее введённой информации...");
-                                                        usersState[foundUser.UserID].Action = null;
-                                                        await OnCommand("/sendreviev", args[..5] + index.ToString(), msg);
-                                                    }
-                                                    break;
-                                                }
-                                            default:
-                                                {
-                                                    Reviev reviev = new(foundUser.UserID, usersState[foundUser.UserID].Rating, usersState[foundUser.UserID].Comment);
-                                                    usersState[foundUser.UserID].Action = null;
+						BasePlace place;
+						switch (args[0])
+						{
+							case ('C'):
+								{
+									place = ObjectLists.Canteens.ElementAt(index);
+									break;
+								}
+							case ('B'):
+								{
+									place = ObjectLists.Buffets.ElementAt(index);
+									break;
+								}
+							case ('G'):
+								{
+									place = ObjectLists.Groceries.ElementAt(index);
+									break;
+								}
+							default:
+								{
+									await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /sendReview.", replyMarkup: new InlineKeyboardButton[]
+									   {
+										   ("Назад", "/places")
+									   });
+									throw new Exception($"Invalid command agrs: {msg.Text}");
+								}
+						}
 
-                                                    if (canteens[index].AddRevievs(reviev))
-                                                    {
-                                                        await bot.SendMessage(msg.Chat.Id, $"Отзыв успешно оставлен!");
-                                                        await OnCommand("/info", usersState[foundUser.UserID].RefTo, msg);
-                                                    }
-                                                    else
-                                                    {
-                                                        await bot.SendMessage(msg.Chat.Id, $"Ошибка при попытке оставить отзыв: {reviev.Rating}⭐️| {reviev.Comment ?? "Комментарий отсутствует"}", replyMarkup: new InlineKeyboardButton[]
-                                                            {
-                                                                ("Назад", $"/info {usersState[foundUser.UserID].RefTo}")
-                                                            });
-                                                        throw new Exception($"Error while user {foundUser.UserID} trying to leave a review on {usersState[foundUser.UserID].RefTo}. {reviev.Rating} | {reviev.Comment ?? "No comment"}");
-                                                    }
-                                                    break;
-                                                }
-                                        }
-                                    break;
-                                }
-                            case ("bufts"):
-                                {
-                                    await bot.SendMessage(msg.Chat.Id, "TODO");
-                                    break;
-                                }
-                            case ("shops"):
-                                {
-                                    await bot.SendMessage(msg.Chat.Id, "TODO");
-                                    break;
-                                }
-                            default:
-                                {
-                                    await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /sendreviev.", replyMarkup: new InlineKeyboardButton[]
-                                            {
-                                            ("Назад", "/places")
-                                            });
-                                    throw new Exception($"Invalid command agrs: {msg.Text}");
-                                }
-                        }
-                        break;
-                    }
-                case ("/deletereviev"):
-                    {
-                        if (args == null)
-                        {
-                            await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: /deletereviev не применяется без аргументов.", replyMarkup: new InlineKeyboardButton[]
-                                {
-                                ("Назад", "/places")
-                                });
-                            throw new Exception($"No command agrs: {msg.Text}");
-                        }
+						if (place.Reviews.Where(x => x.UserID == foundUser.UserID).Any())
+						{
+							await bot.SendHtml(msg.Chat.Id, $"""
+								Вы уже оставили отзыв на {place.Name}
+								
+								• Оценка: {place.Reviews.Where(x => x.UserID == foundUser.UserID).First().Rating}
+								• Комментарий: {place.Reviews.Where(x => x.UserID == foundUser.UserID).First().Comment ?? "Отсутствует"}
+								
+								<keyboard>
+								</row>
+								<row><button text="Изменить" callback="/changeReview -{args}" 
+								<row><button text="Удалить" callback="/deleteReview {args}"
+								</row>
+								<row><button text="Назад" callback="/info {args}"
+								</row>
+								</keyboard>
+								""");
+							break;
+						}
 
-                        var foundUser = profiles
-                            .Where(x => x.UserID == msg.Chat.Id)
-                            .FirstOrDefault();
+						switch (usersState[foundUser.UserID].Action)
+						{
+							case (null):
+								{
+									usersState[foundUser.UserID].Action = UserAction.RatingRequest;
+									usersState[foundUser.UserID].ReferenceToPlace = args;
 
-                        if (foundUser == null)
-                        {
-                            await bot.SendMessage(msg.Chat.Id, "Вы не прошли регистрацию путём ввода /start, большая часть функций бота недоступна",
-                                replyMarkup: new InlineKeyboardButton[] { ("Зарегистрироваться", "/start") });
-                            break;
-                        }
+									await bot.SendMessage(msg.Chat, $"Введите оценку от 1⭐️ до 10⭐️", replyMarkup: new ForceReplyMarkup());
+									break;
+								}
+							case (UserAction.NoActiveRequest):
+								{
+									usersState[foundUser.UserID].Action = null;
 
-                        switch (args[..5])
-                        {
-                            case ("cants"):
-                                {
-                                    int index;
-                                    if (args[^1] == '_')
-                                    {
-                                        if (!int.TryParse(args[5..^1], out index) || index > canteens.Count)
-                                        {
-                                            await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /deletereviev.", replyMarkup: new InlineKeyboardButton[]
-                                                {
-                                                    ("Назад", "/places")
-                                                });
-                                            throw new Exception($"Invalid command agrs: {msg.Text}");
-                                        }
+									if (place.AddReview(foundUser.UserID, usersState[foundUser.UserID].Rating, usersState[foundUser.UserID].Comment))
+									{
+										await bot.SendMessage(msg.Chat.Id, $"Отзыв успешно оставлен!");
+										await OnCommand("/info", usersState[foundUser.UserID].ReferenceToPlace, msg);
+									}
+									else
+									{
+										await bot.SendMessage(msg.Chat.Id, $"Ошибка при попытке оставить отзыв: {usersState[foundUser.UserID].Rating}⭐️| {usersState[foundUser.UserID].Comment ?? "Комментарий отсутствует"}", replyMarkup: new InlineKeyboardButton[]
+											{
+												("Назад", $"/info {usersState[foundUser.UserID].ReferenceToPlace}")
+											});
+										throw new Exception($"Ошибка при попытке оставить отзыв: {usersState[foundUser.UserID].ReferenceToPlace} - {usersState[foundUser.UserID].Rating} | {usersState[foundUser.UserID].Comment ?? "Комментарий отсутствует"}");
+									}
+									break;
+								}
+							default:
+								{
+									if (usersState[foundUser.UserID].ReferenceToPlace != args)
+									{
+										await bot.SendMessage(msg.Chat, $"Зафиксирована попытка оставить отзыв на другую точку. Сброс ранее введённой информации...");
+										usersState[foundUser.UserID].Action = null;
+										await OnCommand("/sendReview", args, msg);
+									}
+									break;
+								}
+						}
+						break;
+					}
+				case ("/deleteReview"):
+					{
+						if (args == null)
+						{
+							await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: /deleteReview не применяется без аргументов.", replyMarkup: new InlineKeyboardButton[]
+							{
+								("Назад", "/places")
+							});
+							throw new Exception($"No command args: {msg.Text}");
+						}
 
-                                        if (canteens[index].DeleteRevievs(foundUser.UserID))
-                                        {
-                                            usersState[foundUser.UserID].Action = null;
-                                            await OnCommand("/sendreviev", $"cants{index}", msg);
-                                            break;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (!int.TryParse(args[5..], out index) || index > canteens.Count)
-                                        {
-                                            await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /deletereviev.", replyMarkup: new InlineKeyboardButton[]
-                                                {
-                                                    ("Назад", "/places")
-                                                });
-                                            throw new Exception($"Invalid command agrs: {msg.Text}");
-                                        }
+						ObjectLists.Persons.TryGetValue(msg.Chat.Id, out Person? foundUser);
 
-                                        if (canteens[index].DeleteRevievs(foundUser.UserID))
-                                        {
-                                            await bot.SendMessage(msg.Chat.Id, $"Отзыв на {canteens[index].Name} успешно удалён!");
-                                            await OnCommand("/info", $"cants{index}", msg);
-                                            break;
-                                        }
-                                    }
-                                    await bot.SendMessage(msg.Chat.Id, $"Ошибка при попытке удалить отзыв на {canteens[index].Name}", replyMarkup: new InlineKeyboardButton[]
-                                                {
-                                                    ("Назад", $"/info cants{index}")
-                                                });
-                                    throw new Exception($"Error while user {foundUser.UserID} trying to delite/change reviev on {canteens[index].Name}");
-                                }
-                            case ("bufts"):
-                                {
-                                    await bot.SendMessage(msg.Chat.Id, "TODO");
-                                    break;
-                                }
-                            case ("shops"):
-                                {
-                                    await bot.SendMessage(msg.Chat.Id, "TODO");
-                                    break;
-                                }
-                            default:
-                                {
-                                    await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /deletereviev.", replyMarkup: new InlineKeyboardButton[]
-                                                {
-                                                    ("Назад", "/places")
-                                                });
-                                    throw new Exception($"Invalid command agrs: {msg.Text}");
-                                }
-                        }
+						if (foundUser == null)
+						{
+							await bot.SendMessage(msg.Chat.Id, "Вы не прошли регистрацию путём ввода /start, большая часть функций бота недоступна",
+								replyMarkup: new InlineKeyboardButton[] { ("Зарегистрироваться", "/start") });
+							break;
+						}
 
-                        break;
-                    }
-                case ("/admin"):
-                    {
-                        break;
-                    }
-                default:
-                    {
-                        await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: неизвестная команда.", replyMarkup: new InlineKeyboardButton[]
-                            {
-                                ("Назад", "/places")
-                            });
-                        throw new Exception($"Invalid command: {msg.Text}");
-                    }
+						int index = 0;
+						if (!char.IsLetter(args[0]) || (args.Length > 1 && !int.TryParse(args[1..], out index)))
+						{
+							await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /deleteReview.", replyMarkup: new InlineKeyboardButton[]
+							{
+								("Назад", "/places")
+							});
+							throw new Exception($"Invalid command agrs: {msg.Text}");
+						}
 
-            }
-        }
+						BasePlace place;
+						switch (args[0])
+						{
+							case ('C'):
+								{
+									place = ObjectLists.Canteens.ElementAt(index);
+									break;
+								}
+							case ('B'):
+								{
+									place = ObjectLists.Buffets.ElementAt(index);
+									break;
+								}
+							case ('G'):
+								{
+									place = ObjectLists.Groceries.ElementAt(index);
+									break;
+								}
+							default:
+								{
+									await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /deleteReview.", replyMarkup: new InlineKeyboardButton[]
+									   {
+										   ("Назад", "/places")
+									   });
+									throw new Exception($"Invalid command agrs: {msg.Text}");
+								}
+						}
 
-        async Task OnUpdate(Update update)
-        {
-            switch (update)
-            {
-                case { CallbackQuery: { } query }:
-                    {
-                        await OnCallbackQuery(query);
-                        break;
-                    }
-                default:
-                    {
-                        Console.WriteLine($"Received unhandled update {update.Type}");
-                        break;
-                    }
-            }
-        }
+						if (!place.Reviews.Where(x => x.UserID == foundUser.UserID).Any())
+						{
+							await bot.SendHtml(msg.Chat.Id, $"""
+								Вы не можете удалить отзыв на {place.Name}
+								
+								Причина: Ваш не существует в системе
+								<keyboard>
+								</row>
+								<row><button text="Назад" callback="/info {args}"
+								</row>
+								</keyboard>
+								""");
+							break;
+						}
 
-        async Task OnCallbackQuery(CallbackQuery callbackQuery)
-        {
-            if (callbackQuery.Data![0] == '/')
-            {
-                await bot.AnswerCallbackQuery(callbackQuery.Id);
+						if (place.DeleteReview(foundUser.UserID))
+						{
+							await bot.SendMessage(msg.Chat.Id, $"Отзыв на {place.Name} успешно удалён!");
+							await OnCommand("/info", args, msg);
+						}
+						else
+						{
+							await bot.SendMessage(msg.Chat.Id, $"Ошибка при попытке удалить отзыв на {place.Name}", replyMarkup: new InlineKeyboardButton[]
+										{
+														("Назад", $"/info {args}")
+										});
+							throw new Exception($"Error while user {foundUser.UserID} trying to delete review on {ObjectLists.Canteens.ElementAt(index).Name}");
+						}
+						break;
+					}
+				case ("/changeReview"):
+					{
+						if (args == null)
+						{
+							await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: /changeReview не применяется без аргументов.", replyMarkup: new InlineKeyboardButton[]
+							{
+								("Назад", "/places")
+							});
+							throw new Exception($"No command args: {msg.Text}");
+						}
 
-                var splitStr = callbackQuery.Data.Split(' ');
-                if (splitStr.Length > 1)
-                    await OnCommand(splitStr[0], splitStr[1], callbackQuery.Message!);
-                else
-                    await OnCommand(splitStr[0], null, callbackQuery.Message!);
-            }
-            else if (callbackQuery.Data == "callback_resetAction")
-            {
-                await bot.AnswerCallbackQuery(callbackQuery.Id);
+						ObjectLists.Persons.TryGetValue(msg.Chat.Id, out Person? foundUser);
 
-                var foundUser = profiles
-                            .Where(x => x.UserID == callbackQuery.Message!.Chat.Id)
-                            .FirstOrDefault();
+						if (foundUser == null)
+						{
+							await bot.SendMessage(msg.Chat.Id, "Вы не прошли регистрацию путём ввода /start, большая часть функций бота недоступна",
+								replyMarkup: new InlineKeyboardButton[] { ("Зарегистрироваться", "/start") });
+							break;
+						}
 
-                if (foundUser == null)
-                {
-                    await OnCommand("/start", null, callbackQuery.Message!);
-                }
+						int index = 0;
+						if (!char.IsLetter(args[1]) || (args.Length > 1 && !int.TryParse(args[2..], out index)))
+						{
+							await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /changeReview.", replyMarkup: new InlineKeyboardButton[]
+							{
+								("Назад", "/places")
+							});
+							throw new Exception($"Invalid command agrs: {msg.Text}");
+						}
 
-                usersState[foundUser!.UserID].Action = null;
-                await OnCommand("/info", usersState[foundUser!.UserID].RefTo, callbackQuery.Message!);
-            }
-            else
-                Console.WriteLine($"Received unhandled callbackQuery {callbackQuery.Data}");
-        }
-    }
+						BasePlace place;
+						switch (args[1])
+						{
+							case ('C'):
+								{
+									place = ObjectLists.Canteens.ElementAt(index);
+									break;
+								}
+							case ('B'):
+								{
+									place = ObjectLists.Buffets.ElementAt(index);
+									break;
+								}
+							case ('G'):
+								{
+									place = ObjectLists.Groceries.ElementAt(index);
+									break;
+								}
+							default:
+								{
+									await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: некорректный аргумент команды /changeReview.", replyMarkup: new InlineKeyboardButton[]
+									   {
+										   ("Назад", "/places")
+									   });
+									throw new Exception($"Invalid command agrs: {msg.Text}");
+								}
+						}
+
+						if (!place.Reviews.Where(x => x.UserID == foundUser.UserID).Any())
+						{
+							await bot.SendHtml(msg.Chat.Id, $"""
+								Вы не можете удалить отзыв на {place.Name}
+								
+								Причина: Ваш не существует в системе
+								<keyboard>
+								</row>
+								<row><button text="Назад" callback="/info {args}"
+								</row>
+								</keyboard>
+								""");
+							break;
+						}
+
+						switch (args[0])
+						{
+							case ('R'):
+								{
+									usersState[foundUser.UserID].Action = UserAction.RatingChange;
+									usersState[foundUser.UserID].ReferenceToPlace = args[1..];
+
+									await bot.SendMessage(msg.Chat, $"Введите НОВУЮ оценку от 1⭐️ до 10⭐️", replyMarkup: new ForceReplyMarkup());
+									break;
+								}
+							case ('C'):
+								{
+									usersState[foundUser.UserID].Action = UserAction.CommentChange;
+									usersState[foundUser.UserID].ReferenceToPlace = args[1..];
+
+									await bot.SendMessage(msg.Chat, $"Введите НОВЫЙ текст отзыва или удалите его отправив -", replyMarkup: new ForceReplyMarkup());
+									break;
+								}
+						}
+
+						switch (usersState[foundUser.UserID].Action)
+						{
+							case (null):
+								{
+									await bot.SendHtml(msg.Chat.Id, $"""
+										Что вы хотите изменить в отзыве на {place.Name}?
+										<keyboard>
+										</row>
+										<row><button text="Оценку" callback="/changeReview R{args[1..]}" 
+										<row><button text="Комментарий" callback="/changeReview C{args[1..]}"
+										</row>
+										<row><button text="Назад" callback="/info {args[1..]}"
+										</row>
+										</keyboard>
+										""");
+									break;
+								}
+							case (UserAction.NoActiveChange):
+								{
+									int newRating = place.Reviews.First(x => x.UserID == foundUser.UserID).Rating;
+									string? newComment = place.Reviews.First(x => x.UserID == foundUser.UserID).Comment;
+
+									if (usersState[foundUser.UserID].Rating != 0)
+										newRating = usersState[foundUser.UserID].Rating;
+									if (usersState[foundUser.UserID].Comment != "-")
+										newComment = usersState[foundUser.UserID].Comment;
+
+									await bot.SendHtml(msg.Chat.Id, $"""
+										Ваш НОВЫЙ отзыв:
+										
+											• Оценка: {newRating}
+											• Комментарий: {((newComment == "-") ? "Отсутствует" : newComment)}
+
+										Всё верно?
+										<keyboard>
+										<button text="Да" callback="/info {usersState[foundUser.UserID].ReferenceToPlace}"
+										<button text="Нет" callback="/changeReview -{usersState[foundUser.UserID].ReferenceToPlace}"
+										</keyboard>
+										""");
+
+									place.DeleteReview(foundUser.UserID);
+									place.AddReview(foundUser.UserID, newRating, newComment);
+									usersState[foundUser.UserID].Action = null;
+									break;
+								}
+						}
+						break;
+					}
+				case ("/admin"):
+					{
+						break;
+					}
+				default:
+					{
+						await bot.SendMessage(msg.Chat.Id, "Ошибка при запросе: неизвестная команда.", replyMarkup: new InlineKeyboardButton[]
+							{
+								("Назад", "/places")
+							});
+						throw new Exception($"Invalid command: {msg.Text}");
+					}
+
+			}
+		}
+
+		async Task OnUpdate(Update update)
+		{
+			switch (update)
+			{
+				case { CallbackQuery: { } query }:
+					{
+						await OnCallbackQuery(query);
+						break;
+					}
+				default:
+					{
+						Console.WriteLine($"Received unhandled update {update.Type}");
+						break;
+					}
+			}
+		}
+
+		async Task OnCallbackQuery(CallbackQuery callbackQuery)
+		{
+			if (callbackQuery.Data![0] == '/')
+			{
+				await bot.AnswerCallbackQuery(callbackQuery.Id);
+
+				var splitStr = callbackQuery.Data.Split(' ');
+				if (splitStr.Length > 1)
+					await OnCommand(splitStr[0], splitStr[1], callbackQuery.Message!);
+				else
+					await OnCommand(splitStr[0], null, callbackQuery.Message!);
+			}
+			else if (callbackQuery.Data == "callback_resetAction")
+			{
+				await bot.AnswerCallbackQuery(callbackQuery.Id);
+
+				ObjectLists.Persons.TryGetValue(callbackQuery.Message!.Chat.Id, out Person? foundUser);
+
+				if (foundUser == null)
+					await OnCommand("/start", null, callbackQuery.Message!);
+				else
+				{
+					usersState[foundUser!.UserID].Action = null;
+					await OnCommand("/info", usersState[foundUser!.UserID].ReferenceToPlace, callbackQuery.Message!);
+				}
+			}
+			else
+				Console.WriteLine($"Received unhandled callbackQuery {callbackQuery.Data}");
+		}
+	}
 }
