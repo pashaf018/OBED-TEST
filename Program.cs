@@ -2314,7 +2314,7 @@ class Program
 
                 if (ifUserExists(TG_id))
                 {
-
+                    Console.WriteLine("Пользователь уже существует");
                 }
                 else
                 {
@@ -2324,7 +2324,7 @@ class Program
                     command.Parameters.Add(new SqliteParameter("@TG_id", TG_id));
                     command.Parameters.Add(new SqliteParameter("@role", role));
                     int number = command.ExecuteNonQuery();
-
+                    Console.WriteLine("Добавлен пользователь");
                 }
             }
         }
@@ -2351,7 +2351,7 @@ class Program
 
                 if (ifUserExists(TG_id))
                 {
-
+                    Console.WriteLine("Пользователь существует");
                 }
                 else
                 {
@@ -2362,7 +2362,7 @@ class Program
                     command.Parameters.Add(new SqliteParameter("@TG_id", TG_id));
                     command.Parameters.Add(new SqliteParameter("@role", role));
                     int number = command.ExecuteNonQuery();
-
+                    Console.WriteLine("Добавлен 1 пользователь");
 
                 }
             }
