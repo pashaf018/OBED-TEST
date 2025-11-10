@@ -314,7 +314,7 @@ class Program
                             [("Места", "/places")],
                             [("Профиль", "/person")],
                             [("Помощь", "/help"), ("Поддержка", "/report")],
-                            [("Регистрация","/registration")]
+                            [("Регистрация","/registration")],
                             [(foundUser!.Role == RoleType.Administrator ? "Админ панель" : "", "/admin")]
                         });
                         break;
