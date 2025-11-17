@@ -1205,6 +1205,10 @@ class Program
                                         AddNewPlace(name, corpus, floor, description,type);
                                         usersState[foundUser!.UserID].Action = null;
                                     }
+                                    await EditOrSendMessage(msg, "Ну вроде сохранил", new InlineKeyboardButton[][]
+                                    {
+                                        [("Назад", "/admin")]
+                                    },ParseMode.Html);
                                     break;
                                 }
                             case ("del"):
