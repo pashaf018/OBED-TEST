@@ -2483,7 +2483,7 @@ class Program
                 	""Corpus""	INTEGER,
                 	""Description""	TEXT NOT NULL DEFAULT 'Description',
                 	""Floor""	INTEGER,
-                	PRIMARY KEY(""Place_id"" AUTOINCREMENT)
+                	PRIMARY KEY(""Place_id"")
                 );";
             command.ExecuteNonQuery();
             if (ifPlaceExists(corpus,floor,name))
