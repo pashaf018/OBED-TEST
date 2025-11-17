@@ -273,7 +273,7 @@ class Program
                                     }
 
                                     usersState[foundUser.UserID].Action = UserAction.NoPlaceNameRequest;
-                                    await OnCommand("/admin", "addP", msg);
+                                    await OnCommand("/admin", "add", msg);
                                     break;
                                 }
                         }
