@@ -1192,7 +1192,7 @@ class Program
                                     if (usersState[foundUser!.UserID].Action == null)
                                     {
                                         usersState[foundUser!.UserID].Action = UserAction.PlaceNameRequest;
-                                        await EditOrSendMessage(msg, "Введите название точки питания,корпус,этаж,описание одним сообщением. Пример: Название,корпус,этаж,описание");
+                                        await EditOrSendMessage(msg, "Введите название точки питания,корпус,этаж,описание,тип одним сообщением. Пример: Название,корпус,этаж,описание,тип");
                                     }
                                     if (usersState[foundUser!.UserID].Action == UserAction.NoPlaceNameRequest)
                                     {
@@ -1201,7 +1201,8 @@ class Program
                                         int corpus = int.Parse(text[1].Trim());
                                         int floor = int.Parse(text[2].Trim());
                                         string description = text[3].Trim();
-                                        AddNewPlace(name, corpus, floor, description);
+                                        int type = int.Parse(text[4].Trim());
+                                        AddNewPlace(name, corpus, floor, description,type);
                                         usersState[foundUser!.UserID].Action = null;
                                     }
                                     break;
@@ -2450,7 +2451,7 @@ class Program
         return "Unknown";
     }
 
-    private static bool AddNewPlace(string name,int corpus,int floor,string description)
+    private static bool AddNewPlace(string name,int corpus,int floor,string description,int type)
     {
         using(var connection = new SqliteConnection(dbConnectionString))
         {
@@ -2463,6 +2464,7 @@ class Program
                     Name TEXT NOT NULL,
                     Corpus INTEGER,
                     Floor INTEGER,
+                    Type INTEGER,
                     Description TEXT NOT NULL DEFAULT 'Description',
                     );";
             command.ExecuteNonQuery();
@@ -2471,11 +2473,12 @@ class Program
                 return false;
             }
             command.CommandText =
-                @"INSERT INTO Places(Name,Corpus,Floor,Description) VALUES (@name,@corpus,@floor,@description);";
+                @"INSERT INTO Places(Name,Corpus,Floor,Description,Type) VALUES (@name,@corpus,@floor,@description,@type);";
             command.Parameters.Add(new SqliteParameter("@name", name));
             command.Parameters.Add(new SqliteParameter("@corpus", corpus));
             command.Parameters.Add(new SqliteParameter("@floor", floor));
             command.Parameters.Add(new SqliteParameter("@description", description));
+            command.Parameters.Add(new SqliteParameter("@type", type));
             return true;
         }
     }
