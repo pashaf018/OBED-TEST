@@ -1095,7 +1095,9 @@ class Program
                                     {
                                         [(AdminControl.ReviewCollector.Count > 0 ? "Начать проверку" : "", $"/admin chk")],
                                         [("Меню блокировок", "/admin ban")],
-                                        [("Обновить админ-меню", "/admin"), ("Назад", $"/start")]
+                                        [("Обновить админ-меню", "/admin")],
+                                        [("Добавить точку питания","/admin addP")],
+                                        [("Назад", $"/start")]
                                     }, ParseMode.Html);
                                     break;
                                 }
@@ -1200,6 +1202,7 @@ class Program
                                         int floor = int.Parse(text[2].Trim());
                                         string description = text[3].Trim();
                                         AddNewPlace(name, corpus, floor, description);
+                                        usersState[foundUser!.UserID].Action = null;
                                     }
                                     break;
                                 }
