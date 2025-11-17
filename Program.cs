@@ -1206,7 +1206,14 @@ class Program
                                                 string description = text[3].Trim();
                                                 int type = int.Parse(text[4].Trim());
                                                 Console.WriteLine($"{name},{corpus},{floor},{description},{type}");
-                                                AddNewPlace(name, corpus, floor, description,type);
+                                                if (AddNewPlace(name, corpus, floor, description, type))
+                                                {
+                                                    Console.WriteLine("Таблица создана");
+                                                }
+                                                else
+                                                {
+                                                    Console.WriteLine("точка уже есть или не получилось создать...");
+                                                }
                                                 usersState[foundUser!.UserID].Action = null;
                                                 await EditOrSendMessage(msg, "Ну вроде сохранил", new InlineKeyboardButton[][]
                                                 {
@@ -2411,7 +2418,7 @@ class Program
                 return false;
             }
             command.CommandText = 
-                @"INSERT INTO Reviews(User_id,Place,Comment,Rating,Date) VALUES (@UserID,@Rating,@comment,@Place,date(now));";
+                @"INSERT INTO Reviews(User_id,Place,Comment,Rating,Date) VALUES (@UserID,@Rating,@comment,@Place,date(now))";
             command.Parameters.Add(new SqliteParameter("@UserID", UserID));
             command.Parameters.Add(new SqliteParameter("@Rating", Rating));
             command.Parameters.Add(new SqliteParameter("@comment", comment));
@@ -2484,7 +2491,7 @@ class Program
                 return false;
             }
             command.CommandText =
-                @"INSERT INTO Places(Name,Corpus,Floor,Description,Type) VALUES (@name,@corpus,@floor,@description,@type);";
+                @"INSERT INTO Places(Name,Corpus,Floor,Description,Type) VALUES (@name,@corpus,@floor,@description,@type)";
             command.Parameters.Add(new SqliteParameter("@name", name));
             command.Parameters.Add(new SqliteParameter("@corpus", corpus));
             command.Parameters.Add(new SqliteParameter("@floor", floor));
