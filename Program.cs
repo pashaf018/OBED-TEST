@@ -1189,25 +1189,31 @@ class Program
                                 }
                             case ("add"):
                                 {
-                                    if (usersState[foundUser!.UserID].Action == null)
+                                    switch (usersState[foundUser!.UserID].Action)
                                     {
-                                        usersState[foundUser!.UserID].Action = UserAction.PlaceNameRequest;
-                                        await EditOrSendMessage(msg, "Введите название точки питания,корпус,этаж,описание,тип одним сообщением. Пример: Название,корпус,этаж,описание,тип");
-                                    }
-                                    if (usersState[foundUser!.UserID].Action == UserAction.NoPlaceNameRequest)
-                                    {
-                                        string[] text = msg.Text.Split(',',StringSplitOptions.RemoveEmptyEntries);
-                                        string name = text[0].Trim();
-                                        int corpus = int.Parse(text[1].Trim());
-                                        int floor = int.Parse(text[2].Trim());
-                                        string description = text[3].Trim();
-                                        int type = int.Parse(text[4].Trim());
-                                        AddNewPlace(name, corpus, floor, description,type);
-                                        usersState[foundUser!.UserID].Action = null;
-                                        await EditOrSendMessage(msg, "Ну вроде сохранил", new InlineKeyboardButton[][]
-                                        {
-                                            [("Назад", "/admin")]
-                                        },ParseMode.Html);
+                                        case (null):
+                                            {
+                                                usersState[foundUser!.UserID].Action = UserAction.PlaceNameRequest;
+                                                await EditOrSendMessage(msg, "Введите название точки питания,корпус,этаж,описание,тип одним сообщением. Пример: Название,корпус,этаж,описание,тип");
+                                                break;
+                                            }
+                                        case (UserAction.NoPlaceNameRequest):
+                                            {
+                                                string[] text = msg.Text.Split(',',StringSplitOptions.RemoveEmptyEntries);
+                                                string name = text[0].Trim();
+                                                int corpus = int.Parse(text[1].Trim());
+                                                int floor = int.Parse(text[2].Trim());
+                                                string description = text[3].Trim();
+                                                int type = int.Parse(text[4].Trim());
+                                                Console.WriteLine($"{name},{corpus},{floor},{description},{type}");
+                                                AddNewPlace(name, corpus, floor, description,type);
+                                                usersState[foundUser!.UserID].Action = null;
+                                                await EditOrSendMessage(msg, "Ну вроде сохранил", new InlineKeyboardButton[][]
+                                                {
+                                                    [("Назад", "/admin")]
+                                                },ParseMode.Html);
+                                                break;
+                                            }
                                     }
                                     break;
                                 }
