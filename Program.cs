@@ -264,6 +264,18 @@ class Program
                                     await OnCommand("/admin", "chkA", msg);
                                     break;
                                 }
+                            case (UserAction.PlaceNameRequest):
+                                {
+                                    if (string.IsNullOrWhiteSpace(msg.Text))
+                                    {
+                                        await EditOrSendMessage(msg, $"Ошибка при обработке! Убедитесь, что ваше сообщение содержит текст", null, ParseMode.None, true);
+                                        break;
+                                    }
+
+                                    usersState[foundUser.UserID].Action = UserAction.NoPlaceNameRequest;
+                                    await OnCommand("/admin", "addP", msg);
+                                    break;
+                                }
                         }
                         break;
                     }
@@ -1035,7 +1047,7 @@ class Program
                     }
                 case ("/admin"):
                     {
-                        if (checkUserRole(foundUser.UserID) != "Administrator")
+                        if (checkUserRole(foundUser!.UserID) != "Administrator")
                         {
                             await EditOrSendMessage(msg, "Ошибка при запросе: неизвестная команда.", new InlineKeyboardButton[]
                             {
@@ -1054,7 +1066,9 @@ class Program
                             {
                                 [(AdminControl.ReviewCollector.Count > 0 ? "Начать проверку" : "", $"/admin chk")],
                                 [("Меню блокировок", "/admin ban")],
-                                [("Обновить админ-меню", "/admin ref"), ("Назад", $"/start")]
+                                [("Обновить админ-меню", "/admin ref")],
+                                [("Добавить точку питания", "/admin addP")], 
+                                [("Назад", $"/start")]
                             }, ParseMode.Html);
                             break;
                         }
@@ -1168,6 +1182,24 @@ class Program
                                                 });
                                                 throw new Exception($"Invalid command agrs: {msg.Text}");
                                             }
+                                    }
+                                    break;
+                                }
+                            case ("addP"):
+                                {
+                                    if (usersState[foundUser!.UserID].Action == null)
+                                    {
+                                        usersState[foundUser!.UserID].Action = UserAction.PlaceNameRequest;
+                                        await EditOrSendMessage(msg, "Введите название точки питания,корпус,этаж,описание одним сообщением. Пример: Название,корпус,этаж,описание");
+                                    }
+                                    if (usersState[foundUser!.UserID].Action == UserAction.NoPlaceNameRequest)
+                                    {
+                                        string[] text = msg.Text.Split(',',StringSplitOptions.RemoveEmptyEntries);
+                                        string name = text[0].Trim();
+                                        int corpus = int.Parse(text[1].Trim());
+                                        int floor = int.Parse(text[2].Trim());
+                                        string description = text[3].Trim();
+                                        AddNewPlace(name, corpus, floor, description);
                                     }
                                     break;
                                 }

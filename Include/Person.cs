@@ -55,7 +55,10 @@ namespace OBED.Include
 		/// <summary> Для МОДЕРАЦИИ отзывов. Отметка, позволяющая перейти к отправки отредактированного сообщения</summary>
 		Moderation,
 		/// <summary> Для МОДЕРАЦИИ отзывов. Отметка, позволяющая перейти к финальному этапу отправки отредактированного сообщения</summary>
-		NoActiveModeration
+		NoActiveModeration,
+		/// <summary> Для ДОБАВЛЕНИЯ точки питания админом. Запрос не-пустой строки/названия точки</summary>
+		PlaceNameRequest,
+		NoPlaceNameRequest
 	}
 	class UserState
 	{
