@@ -2491,7 +2491,7 @@ class Program
                 return false;
             }
             command.CommandText =
-                @"INSERT INTO Places(Name,Corpus,Floor,Description,Type) VALUES (@name,@corpus,@floor,@description,@type)";
+                @"INSERT INTO Places(Name,Type,Corpus,Description,Floor) VALUES (@name,@type,@corpus,@description,@floor)";
             command.Parameters.Add(new SqliteParameter("@name", name));
             command.Parameters.Add(new SqliteParameter("@corpus", corpus));
             command.Parameters.Add(new SqliteParameter("@floor", floor));
