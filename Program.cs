@@ -1067,7 +1067,7 @@ class Program
                                 [(AdminControl.ReviewCollector.Count > 0 ? "Начать проверку" : "", $"/admin chk")],
                                 [("Меню блокировок", "/admin ban")],
                                 [("Обновить админ-меню", "/admin ref")],
-                                [("Добавить точку питания", "/admin addP")], 
+                                [("Добавить точку питания", "/admin add")], 
                                 [("Назад", $"/start")]
                             }, ParseMode.Html);
                             break;
@@ -1096,7 +1096,7 @@ class Program
                                         [(AdminControl.ReviewCollector.Count > 0 ? "Начать проверку" : "", $"/admin chk")],
                                         [("Меню блокировок", "/admin ban")],
                                         [("Обновить админ-меню", "/admin")],
-                                        [("Добавить точку питания","/admin addP")],
+                                        [("Добавить точку питания","/admin add")],
                                         [("Назад", $"/start")]
                                     }, ParseMode.Html);
                                     break;
@@ -1187,7 +1187,7 @@ class Program
                                     }
                                     break;
                                 }
-                            case ("addP"):
+                            case ("add"):
                                 {
                                     if (usersState[foundUser!.UserID].Action == null)
                                     {
