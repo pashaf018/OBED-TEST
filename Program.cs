@@ -321,7 +321,6 @@ class Program
                             [("Места", "/places")],
                             [("Профиль", "/person")],
                             [("Помощь", "/help"), ("Поддержка", "/report")],
-                            [("Регистрация","/registration")],
                             [(checkUserRole(msg.Chat.Id) == "Administrator" ? "Админ панель" : "", "/admin")]
                         });
                         break;
@@ -2483,7 +2482,7 @@ class Program
                 	""Corpus""	INTEGER,
                 	""Description""	TEXT NOT NULL DEFAULT 'Description',
                 	""Floor""	INTEGER,
-                	PRIMARY KEY(""Place_id"")
+                	PRIMARY KEY(""Place_id"" AUTOINCREMENT)
                 );";
             command.ExecuteNonQuery();
             if (ifPlaceExists(corpus,floor,name))
@@ -2497,6 +2496,8 @@ class Program
             command.Parameters.Add(new SqliteParameter("@floor", floor));
             command.Parameters.Add(new SqliteParameter("@description", description));
             command.Parameters.Add(new SqliteParameter("@type", type));
+            int number = command.ExecuteNonQuery();
+            Console.WriteLine($"Кол-во добавленных элементов: {number}");
             return true;
         }
     }
