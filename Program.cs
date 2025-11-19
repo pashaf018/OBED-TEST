@@ -1809,7 +1809,7 @@ class Program
                             throw new Exception($"No command args: {callbackQuery.Message.Text}");
                         }
 
-                        if (splitStr[0] == "#admin" && foundUser.Role == RoleType.Administrator)
+                        if (splitStr[0] == "#admin" && checkUserRole(foundUser.UserID) == "Administrator")
                         {
                             switch (splitStr[1][..4])
                             {
