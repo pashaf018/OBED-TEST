@@ -2358,7 +2358,7 @@ class Program
 									    Name	TEXT DEFAULT 'Unknown',
 										TG_id	INTEGER NOT NULL,
 										Role	TEXT NOT NULL DEFAULT 'CommonUser',
-										PRIMARY KEY(""List_id"")
+										PRIMARY KEY(""List_id"",""TG_id"")
 										);";
                 command.ExecuteNonQuery();
 

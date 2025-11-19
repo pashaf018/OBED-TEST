@@ -76,23 +76,22 @@ namespace OBED.Include
 				command.CommandText =
 					@"CREATE TABLE IF NOT EXISTS ""Reviews"" (
                     ""Review_id"" INTEGER,
-                	""Users_id""	INTEGER PRIMARY KEY,
-                    ""Place_id"" INTEGER PRIMARY KEY,
+                	""Users_id""	INTEGER,
+                    ""Place_id"" INTEGER,
                 	""Comment""	TEXT,
                 	""Rating""	INTEGER NOT NULL,
                     ""Date"" TEXT,
-                	FOREIGN KEY(""Users_id"") REFERENCES ""TG_Users""(""TG_id"") ON UPDATE CASCADE,
+                	FOREIGN KEY(""Users_id"") REFERENCES ""TG_Users""(""Users_id"") ON UPDATE CASCADE,
                     FOREIGN KEY(""Place_id"") REFERENCES ""Places""(Place_id) ON UPDATE CASCADE,
-                    PRIMARY KEY(""Review_id"" AUTOINCREMENT)
+                    PRIMARY KEY(""Review_id"" AUTOINCREMENT),
                 );";
 				command.ExecuteNonQuery();
-
-				if (IfUserHaveReviewOnPlace(review.UserID, review.Place_Id))
+                if (IfUserHaveReviewOnPlace(review.UserID, review.Place_Id))
 				{
 					return false;
 				}
 				command.CommandText =
-					@"INSERT INTO Reviews(Users_id,Place_id,Comment,Rating,Date) VALUES (@UserID,@Place,@comment,@Rating,@date)";
+					@"INSERT INTO Reviews(List_id,Place_id,Comment,Rating,Date) VALUES (@UserID,@Place,@comment,@Rating,@date)";
 				command.Parameters.Add(new SqliteParameter("@UserID", review.UserID));
 				command.Parameters.Add(new SqliteParameter("@Rating", review.Rating));
 				command.Parameters.Add(new SqliteParameter("@comment", review.Comment));
@@ -255,6 +254,7 @@ namespace OBED.Include
                 connection.Open();
                 var command = new SqliteCommand();
                 command.Connection = connection;
+
                 command.CommandText =
                     $@"SELECT 1 FROM Reviews WHERE
                     ""Users_id"" LIKE {UserID} AND ""Place_id"" LIKE '{Place}'";
