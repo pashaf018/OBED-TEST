@@ -20,53 +20,53 @@ class Program
         var meBot = await bot.GetMe();
 
         // TODO: переход на SQL
-        List<Product> products1 = [new("Main1", ProductType.MainDish, (50, false)), new("Side1", ProductType.SideDish, (100, false)), new("Drink1", ProductType.Drink, (150, false)), new("Appetizer1", ProductType.Appetizer, (200, false)),
-            new("Main2", ProductType.MainDish, (250, true)), new("Side2", ProductType.SideDish, (300, true)), new("Drink2", ProductType.Drink, (350, true)), new("Appetizer2", ProductType.Appetizer, (400, true)),
-            new("Main3", ProductType.MainDish, (450, false)), new("Side3", ProductType.SideDish, (500, false)), new("Drink3", ProductType.Drink, (550, false)), new("Appetizer3", ProductType.Appetizer, (600, false))];
+        //List<Product> products1 = [new("Main1", ProductType.MainDish, (50, false)), new("Side1", ProductType.SideDish, (100, false)), new("Drink1", ProductType.Drink, (150, false)), new("Appetizer1", ProductType.Appetizer, (200, false)),
+        //    new("Main2", ProductType.MainDish, (250, true)), new("Side2", ProductType.SideDish, (300, true)), new("Drink2", ProductType.Drink, (350, true)), new("Appetizer2", ProductType.Appetizer, (400, true)),
+        //    new("Main3", ProductType.MainDish, (450, false)), new("Side3", ProductType.SideDish, (500, false)), new("Drink3", ProductType.Drink, (550, false)), new("Appetizer3", ProductType.Appetizer, (600, false))];
 
-        List<Product> products2 = [new("Main1", ProductType.MainDish, (50, false)), new("Side1", ProductType.SideDish, (100, false)), new("Drink1", ProductType.Drink, (150, false))];
+        //List<Product> products2 = [new("Main1", ProductType.MainDish, (50, false)), new("Side1", ProductType.SideDish, (100, false)), new("Drink1", ProductType.Drink, (150, false))];
 
-        List<Product> products3 = [new("Main1", ProductType.MainDish, (50, false)), new("Side1", ProductType.SideDish, (100, false)), new("Drink1", ProductType.Drink, (150, false)), new("Appetizer1", ProductType.Appetizer, (200, false)),
-            new("Main2", ProductType.MainDish, (250, true))];
+        //List<Product> products3 = [new("Main1", ProductType.MainDish, (50, false)), new("Side1", ProductType.SideDish, (100, false)), new("Drink1", ProductType.Drink, (150, false)), new("Appetizer1", ProductType.Appetizer, (200, false)),
+        //    new("Main2", ProductType.MainDish, (250, true))];
 
-        List<Product> products4 = [new("Main1", ProductType.MainDish, (50, false)), new("Side1", ProductType.SideDish, (100, false)), new("Drink1", ProductType.Drink, (150, false)), new("Appetizer1", ProductType.Appetizer, (200, false)),
-            new("Main2", ProductType.MainDish, (250, true)), new("Side2", ProductType.SideDish, (300, true))];
+        //List<Product> products4 = [new("Main1", ProductType.MainDish, (50, false)), new("Side1", ProductType.SideDish, (100, false)), new("Drink1", ProductType.Drink, (150, false)), new("Appetizer1", ProductType.Appetizer, (200, false)),
+        //    new("Main2", ProductType.MainDish, (250, true)), new("Side2", ProductType.SideDish, (300, true))];
 
-        List<Product> products5 = [new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)),
-            new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)),
-            new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false))];
+        //List<Product> products5 = [new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)),
+        //    new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)),
+        //    new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false))];
 
-        List<Review> reviews1 = [new(3,123456789, 10), new(3,123456789, 9), new(3,123456789, 8), new(3,123456789, 7), new(3,123456789, 6), new(3,123456789, 5), new(3,123456789, 4)];
+        //List<Review> reviews1 = [new(3,123456789, 10), new(3,123456789, 9), new(3,123456789, 8), new(3,123456789, 7), new(3,123456789, 6), new(3,123456789, 5), new(3,123456789, 4)];
 
-        List<Review> reviews2 = [new(2,123456789, 10), new(2,123456789, 9), new(2,123456789, 8, "8"), new(2,123456789, 7, "7"), new(2,123456789, 6), new(2,123456789, 5, "5"), new(2,123456789, 4)];
+        //List<Review> reviews2 = [new(2,123456789, 10), new(2,123456789, 9), new(2,123456789, 8, "8"), new(2,123456789, 7, "7"), new(2,123456789, 6), new(2,123456789, 5, "5"), new(2,123456789, 4)];
 
-        List<Review> reviews3 = [new(1,123456789, 7, "Old"), new(1,123456789, 9, "Old"), new(1,123456789, 5, "Old"), new(1,123456789, 10, "Old"), new(1,123456789, 6, "Old"), new(1,123456789, 8, "Old"), new(1,123456789, 4, "Old")];
-        reviews3.Add(new(1,987654321, 3, "New"));
+        //List<Review> reviews3 = [new(1,123456789, 7, "Old"), new(1,123456789, 9, "Old"), new(1,123456789, 5, "Old"), new(1,123456789, 10, "Old"), new(1,123456789, 6, "Old"), new(1,123456789, 8, "Old"), new(1,123456789, 4, "Old")];
+        //reviews3.Add(new(1,987654321, 3, "New"));
 
-        ObjectLists.AddRangeList<Canteen>([new(1,"Canteen1", 1, 1, null, reviews3, products1, null),
-            new(2,"Canteen2", 2, 2, null, reviews2, products2, null),
-            new(3,"Canteen3", 2, 2, null, reviews1, products3, null),
-            new(4,"Canteen4", 2, 2, null, null, null, null),
-            new(5,"Canteen5", 2, 2, null, null, null, null),
-            new(6,"Canteen6", 2, 2, null, null, null, null),
-            new(7,"Canteen7", 2, 2, null, null, null, null),
-            new(8,"Canteen8", 2, 2, null, null, null, null),
-            new(9,"Canteen9", 2, 2, null, null, null, null),
-            new(10,"Canteen10", 2, 2, null, null, null, null),
-            new(11,"Canteen11", 2, 2, null, null, null, null),
-            new(12,"Canteen12", 2, 2, null, null, null, null),
-            new(13,"Canteen13", 2, 2, null, null, null, null),
-            new(14,"Canteen14", 2, 2, null, null, null, null),
-            new(15,"Canteen15", 2, 2, null, reviews1, products5, null),
-            new(16,"Canteen16", 3, 3, null, reviews1, products4, null)]);
-        ObjectLists.AddRangeList<Buffet>([new(17,"Buffet1", 1, 1, null, reviews1, products1, null),
-            new(18,"Buffet2", 2, 2, null, reviews2, products2, null),
-            new(19,"Buffet3", 3, 3, null, reviews3, products4, null)]);
-        ObjectLists.AddRangeList<Grocery>([new(20,"Grocery1", null, reviews1, products1, null),
-            new(21,"Grocery2", null, reviews2, products2, null),
-            new(22,"Grocery3", null, reviews3, products4, null)]);
+        //ObjectLists.AddRangeList<Canteen>([new(1,"Canteen1", 1, 1, null, reviews3, products1, null),
+        //    new(2,"Canteen2", 2, 2, null, reviews2, products2, null),
+        //    new(3,"Canteen3", 2, 2, null, reviews1, products3, null),
+        //    new(4,"Canteen4", 2, 2, null, null, null, null),
+        //    new(5,"Canteen5", 2, 2, null, null, null, null),
+        //    new(6,"Canteen6", 2, 2, null, null, null, null),
+        //    new(7,"Canteen7", 2, 2, null, null, null, null),
+        //    new(8,"Canteen8", 2, 2, null, null, null, null),
+        //    new(9,"Canteen9", 2, 2, null, null, null, null),
+        //    new(10,"Canteen10", 2, 2, null, null, null, null),
+        //    new(11,"Canteen11", 2, 2, null, null, null, null),
+        //    new(12,"Canteen12", 2, 2, null, null, null, null),
+        //    new(13,"Canteen13", 2, 2, null, null, null, null),
+        //    new(14,"Canteen14", 2, 2, null, null, null, null),
+        //    new(15,"Canteen15", 2, 2, null, reviews1, products5, null),
+        //    new(16,"Canteen16", 3, 3, null, reviews1, products4, null)]);
+        //ObjectLists.AddRangeList<Buffet>([new(17,"Buffet1", 1, 1, null, reviews1, products1, null),
+        //    new(18,"Buffet2", 2, 2, null, reviews2, products2, null),
+        //    new(19,"Buffet3", 3, 3, null, reviews3, products4, null)]);
+        //ObjectLists.AddRangeList<Grocery>([new(20,"Grocery1", null, reviews1, products1, null),
+        //    new(21,"Grocery2", null, reviews2, products2, null),
+        //    new(22,"Grocery3", null, reviews3, products4, null)]);
 
-        reviews3.Add(new(1,611614145, 3, "SuperNew"));
+        //reviews3.Add(new(1,611614145, 3, "SuperNew"));
 
         // TODO: переход на noSQL
         ConcurrentDictionary<long, UserState> usersState = [];
