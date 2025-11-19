@@ -1196,7 +1196,8 @@ class Program
                                         case (null):
                                             {
                                                 usersState[foundUser!.UserID].Action = UserAction.PlaceNameRequest;
-                                                await EditOrSendMessage(msg, "Введите название точки питания,корпус,этаж,описание,тип одним сообщением. Пример: Название,корпус,этаж,описание,тип");
+                                                await EditOrSendMessage(msg, "Введите название точки питания,корпус,этаж,описание,тип одним сообщением. " +
+                                                    "Пример: Название,корпус,этаж,описание,тип");
                                                 break;
                                             }
                                         case (UserAction.NoPlaceNameRequest):
@@ -1210,6 +1211,14 @@ class Program
                                                 Console.WriteLine($"{name},{corpus},{floor},{description},{type}");
                                                 if (AddNewPlace(name, corpus, floor, description, type))
                                                 {
+                                                    switch (type)
+                                                    {
+                                                        case 1:
+                                                            {
+                                                                ObjectLists.AddRangeList(new List<Buffet>(BasePlace.GetPlaceId(name, corpus, floor, type), name, corpus, floor));
+                                                                break;
+                                                            }
+                                                    }
                                                     Console.WriteLine("Таблица создана");
                                                 }
                                                 else

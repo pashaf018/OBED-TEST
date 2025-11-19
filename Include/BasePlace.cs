@@ -129,6 +129,28 @@ namespace OBED.Include
 			return review;
 		}
 
+		public static int GetPlaceId(string name,int corpus, int floor, int type)
+		{
+            string dbConnectionString = "Data Source=OBED_DB.db";
+			int placeid = 0;
+            using (SqliteConnection connection = new SqliteConnection(dbConnectionString))
+            {
+                connection.Open();
+                var command = new SqliteCommand();
+                command.Connection = connection;
+                command.CommandText = $@"SELECT Place_id FROM Places WHERE Name LIKE '{name}' AND Corpus LIKE {corpus} AND Floor LIKE {floor} AND Type LIKE {type}";
+                using (SqliteDataReader reader = command.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+						placeid = reader.GetInt32(0);
+						return placeid;
+                    }
+                }
+            }
+			return placeid;
+        }
+
 		public static void LoadAllPlaces(int type)
 		{
             string dbConnectionString = "Data Source=OBED_DB.db";
