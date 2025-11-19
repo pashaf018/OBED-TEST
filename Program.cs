@@ -36,37 +36,37 @@ class Program
             new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)),
             new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false)), new("Main1", ProductType.MainDish, (50, false))];
 
-        List<Review> reviews1 = [new(123456789, 10), new(123456789, 9), new(123456789, 8), new(123456789, 7), new(123456789, 6), new(123456789, 5), new(123456789, 4)];
+        List<Review> reviews1 = [new(3,123456789, 10), new(3,123456789, 9), new(3,123456789, 8), new(3,123456789, 7), new(3,123456789, 6), new(3,123456789, 5), new(3,123456789, 4)];
 
-        List<Review> reviews2 = [new(123456789, 10), new(123456789, 9), new(123456789, 8, "8"), new(123456789, 7, "7"), new(123456789, 6), new(123456789, 5, "5"), new(123456789, 4)];
+        List<Review> reviews2 = [new(2,123456789, 10), new(2,123456789, 9), new(2,123456789, 8, "8"), new(2,123456789, 7, "7"), new(2,123456789, 6), new(2,123456789, 5, "5"), new(2,123456789, 4)];
 
-        List<Review> reviews3 = [new(123456789, 7, "Old"), new(123456789, 9, "Old"), new(123456789, 5, "Old"), new(123456789, 10, "Old"), new(123456789, 6, "Old"), new(123456789, 8, "Old"), new(123456789, 4, "Old")];
-        reviews3.Add(new(987654321, 3, "New"));
+        List<Review> reviews3 = [new(1,123456789, 7, "Old"), new(1,123456789, 9, "Old"), new(1,123456789, 5, "Old"), new(1,123456789, 10, "Old"), new(1,123456789, 6, "Old"), new(1,123456789, 8, "Old"), new(1,123456789, 4, "Old")];
+        reviews3.Add(new(1,987654321, 3, "New"));
 
-        ObjectLists.AddRangeList<Canteen>([new("Canteen1", 1, 1, null, reviews3, products1, null),
-            new("Canteen2", 2, 2, null, reviews2, products2, null),
-            new("Canteen3", 2, 2, null, reviews1, products3, null),
-            new("Canteen4", 2, 2, null, null, null, null),
-            new("Canteen5", 2, 2, null, null, null, null),
-            new("Canteen6", 2, 2, null, null, null, null),
-            new("Canteen7", 2, 2, null, null, null, null),
-            new("Canteen8", 2, 2, null, null, null, null),
-            new("Canteen9", 2, 2, null, null, null, null),
-            new("Canteen10", 2, 2, null, null, null, null),
-            new("Canteen11", 2, 2, null, null, null, null),
-            new("Canteen12", 2, 2, null, null, null, null),
-            new("Canteen13", 2, 2, null, null, null, null),
-            new("Canteen14", 2, 2, null, null, null, null),
-            new("Canteen15", 2, 2, null, reviews1, products5, null),
-            new("Canteen16", 3, 3, null, reviews1, products4, null)]);
-        ObjectLists.AddRangeList<Buffet>([new("Buffet1", 1, 1, null, reviews1, products1, null),
-            new("Buffet2", 2, 2, null, reviews2, products2, null),
-            new("Buffet3", 3, 3, null, reviews3, products4, null)]);
-        ObjectLists.AddRangeList<Grocery>([new("Grocery1", null, reviews1, products1, null),
-            new("Grocery2", null, reviews2, products2, null),
-            new("Grocery3", null, reviews3, products4, null)]);
+        ObjectLists.AddRangeList<Canteen>([new(1,"Canteen1", 1, 1, null, reviews3, products1, null),
+            new(2,"Canteen2", 2, 2, null, reviews2, products2, null),
+            new(3,"Canteen3", 2, 2, null, reviews1, products3, null),
+            new(4,"Canteen4", 2, 2, null, null, null, null),
+            new(5,"Canteen5", 2, 2, null, null, null, null),
+            new(6,"Canteen6", 2, 2, null, null, null, null),
+            new(7,"Canteen7", 2, 2, null, null, null, null),
+            new(8,"Canteen8", 2, 2, null, null, null, null),
+            new(9,"Canteen9", 2, 2, null, null, null, null),
+            new(10,"Canteen10", 2, 2, null, null, null, null),
+            new(11,"Canteen11", 2, 2, null, null, null, null),
+            new(12,"Canteen12", 2, 2, null, null, null, null),
+            new(13,"Canteen13", 2, 2, null, null, null, null),
+            new(14,"Canteen14", 2, 2, null, null, null, null),
+            new(15,"Canteen15", 2, 2, null, reviews1, products5, null),
+            new(16,"Canteen16", 3, 3, null, reviews1, products4, null)]);
+        ObjectLists.AddRangeList<Buffet>([new(17,"Buffet1", 1, 1, null, reviews1, products1, null),
+            new(18,"Buffet2", 2, 2, null, reviews2, products2, null),
+            new(19,"Buffet3", 3, 3, null, reviews3, products4, null)]);
+        ObjectLists.AddRangeList<Grocery>([new(20,"Grocery1", null, reviews1, products1, null),
+            new(21,"Grocery2", null, reviews2, products2, null),
+            new(22,"Grocery3", null, reviews3, products4, null)]);
 
-        reviews3.Add(new(611614145, 3, "SuperNew"));
+        reviews3.Add(new(1,611614145, 3, "SuperNew"));
 
         // TODO: переход на noSQL
         ConcurrentDictionary<long, UserState> usersState = [];
@@ -1819,7 +1819,7 @@ class Program
                                             AdminControl.SetReviewStatus(usersState[foundUser.UserID].Comment!);
                                         else
                                         {
-                                            AdminControl.ReviewCollector[0].place.AddReview(AdminControl.ReviewCollector[0].review.UserID, AdminControl.ReviewCollector[0].review.Rating, null);
+                                            AdminControl.ReviewCollector[0].place.AddReview(AdminControl.ReviewCollector[0].place.Place_id,AdminControl.ReviewCollector[0].review.UserID, AdminControl.ReviewCollector[0].review.Rating, null);
                                             AdminControl.SetReviewStatus();
                                         }
 
@@ -2388,62 +2388,21 @@ class Program
         }
     }
 
-    private static bool AddReview(long UserID,int Rating,string comment,string Place)
+    
+
+    private static bool deleteReview(int Review_id)
     {
-        if (UserID <= 0)
-            throw new ArgumentException("UserID должно быть больше 0", nameof(UserID));
-        if(Rating < 1 || Rating > 10)
-            throw new ArgumentException("Рейтинг должен быть от 1 до 10",nameof(Rating));
         using (SqliteConnection connection = new SqliteConnection(dbConnectionString))
         {
             connection.Open();
             var command = new SqliteCommand();
             command.Connection = connection;
-            //Создание таблицы если её нету
             command.CommandText =
-                @"CREATE TABLE IF NOT EXISTS ""Reviews"" (
-                	""Users_id""	INTEGER,
-                    ""Place_id"" INTEGER PRIMARY KEY AUTOINCREMENT,
-                	""Comment""	TEXT,
-                	""Rating""	INTEGER NOT NULL,
-                    ""Date"" TEXT,
-                	FOREIGN KEY(""Users_id"") REFERENCES ""TG_Users""(""List_id"") ON UPDATE CASCADE,
-                    FOREIGN KEY(""Place_id"") REFERENCES ""Places""(Place_id) ON UPDATE CASCADE
-                );";
-            command.ExecuteNonQuery();
-
-            if (IfUserHaveReviewOnPlace(UserID, Place))
-            {
-                return false;
-            }
-            command.CommandText = 
-                @"INSERT INTO Reviews(User_id,Place,Comment,Rating,Date) VALUES (@UserID,@Rating,@comment,@Place,date(now))";
-            command.Parameters.Add(new SqliteParameter("@UserID", UserID));
-            command.Parameters.Add(new SqliteParameter("@Rating", Rating));
-            command.Parameters.Add(new SqliteParameter("@comment", comment));
-            command.Parameters.Add(new SqliteParameter("@Place", Place));
+                $@"DELETE FROM ""Reviews""
+                   WHERE ""Review_id"" = {Review_id};";
             command.ExecuteNonQuery();
             return true;
         }
-    }
-
-    private static bool IfUserHaveReviewOnPlace(long UserID,string Place)
-    {
-        using (SqliteConnection connection = new SqliteConnection(dbConnectionString))
-        {
-            connection.Open();
-            var command = new SqliteCommand();
-            command.Connection = connection;
-            command.CommandText =
-                $@"SELECT 1 FROM Reviews WHERE
-                    ""Users_id"" LIKE {UserID} AND ""Place"" LIKE '{Place}'";
-            return command.ExecuteScalar() != null;
-        }
-    }
-
-    private static bool deleteReview()
-    {
-        return true;
     }
 
     private static string checkUserRole(long UserID)
