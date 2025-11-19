@@ -76,8 +76,8 @@ namespace OBED.Include
 				command.CommandText =
 					@"CREATE TABLE IF NOT EXISTS ""Reviews"" (
                     ""Review_id"" INTEGER,
-                	""Users_id""	INTEGER,
-                    ""Place_id"" INTEGER,
+                	""Users_id""	INTEGER PRIMARY KEY,
+                    ""Place_id"" INTEGER PRIMARY KEY,
                 	""Comment""	TEXT,
                 	""Rating""	INTEGER NOT NULL,
                     ""Date"" TEXT,
