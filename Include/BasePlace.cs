@@ -83,7 +83,7 @@ namespace OBED.Include
                     ""Date"" TEXT,
                 	FOREIGN KEY(""Users_id"") REFERENCES ""TG_Users""(""Users_id"") ON UPDATE CASCADE,
                     FOREIGN KEY(""Place_id"") REFERENCES ""Places""(Place_id) ON UPDATE CASCADE,
-                    PRIMARY KEY(""Review_id"" AUTOINCREMENT),
+                    PRIMARY KEY(""Review_id"" AUTOINCREMENT)
                 );";
 				command.ExecuteNonQuery();
                 if (IfUserHaveReviewOnPlace(review.UserID, review.Place_Id))
