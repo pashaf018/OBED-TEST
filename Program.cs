@@ -345,7 +345,7 @@ class Program
                     {
                         await EditOrSendMessage(msg, $"""
 						Ваше имя: {foundUser!.Username} ({foundUser!.UserID})
-						Ваш статус: {foundUser!.Role}
+						Ваш статус: {checkUserRole(foundUser!.UserID)}
 						""", new InlineKeyboardButton[]
                         {
                             ("Назад","/start")
