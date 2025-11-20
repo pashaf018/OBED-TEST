@@ -18,8 +18,15 @@ namespace OBED.Include
 		/// <summary>Сортировка от новых к старым. Ставится по умолчанию.</summary>
 		NewDate
 	}
+    class PlaceData
+    {
+		public string? Name { get; set; } = "Unknown";
+		public int Corpus { get;  set; }
+		public int Floor { get;  set; }
+		public string? Description { get;  set; } = "No Description";
+    }
 
-	class Review
+    class Review
 	{
 		public int Place_Id { get; private set; }
 		public long UserID { get; init; }
@@ -131,6 +138,10 @@ namespace OBED.Include
 
 		public static int GetPlaceId(string name,int corpus, int floor, int type)
 		{
+			if(type <= 0 || type > 3)
+			{
+                throw new ArgumentException("type - 1(Буфет), 2(Столовая) или 3(Продуктовый)", nameof(type));
+            }
             string dbConnectionString = "Data Source=OBED_DB.db";
 			int placeid = 0;
             using (SqliteConnection connection = new SqliteConnection(dbConnectionString))

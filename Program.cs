@@ -269,13 +269,26 @@ class Program
                                 }
                             case (UserAction.PlaceNameRequest):
                                 {
-                                    if (string.IsNullOrWhiteSpace(msg.Text))
-                                    {
-                                        await EditOrSendMessage(msg, $"Ошибка при обработке! Убедитесь, что ваше сообщение содержит текст", null, ParseMode.None, true);
-                                        break;
-                                    }
-
-                                    usersState[foundUser.UserID].Action = UserAction.NoPlaceNameRequest;
+                                    await OnCommand("/admin", "add", msg);
+                                    break;
+                                }
+                            case (UserAction.CorpusRequest):
+                                {
+                                    await OnCommand("/admin", "add", msg);
+                                    break;
+                                }
+                            case (UserAction.FloorRequest):
+                                {
+                                    await OnCommand("/admin", "add", msg);
+                                    break;
+                                }
+                            case (UserAction.DescriptionRequest):
+                                {
+                                    await OnCommand("/admin", "add", msg);
+                                    break;
+                                }
+                            case (UserAction.TypeRequest):
+                                {
                                     await OnCommand("/admin", "add", msg);
                                     break;
                                 }
@@ -1191,39 +1204,101 @@ class Program
                                 }
                             case ("add"):
                                 {
+
                                     switch (usersState[foundUser!.UserID].Action)
                                     {
                                         case (null):
                                             {
                                                 usersState[foundUser!.UserID].Action = UserAction.PlaceNameRequest;
-                                                await EditOrSendMessage(msg, "Введите название точки питания,корпус,этаж,описание,тип одним сообщением. " +
-                                                    "Пример: Название,корпус,этаж,описание,тип");
+                                                usersState[foundUser!.UserID].TempData = new PlaceData();
+                                                await EditOrSendMessage(msg, "введите название");
                                                 break;
                                             }
-                                        case (UserAction.NoPlaceNameRequest):
+                                        case (UserAction.PlaceNameRequest):
                                             {
-                                                string[] text = msg.Text.Split(',',StringSplitOptions.RemoveEmptyEntries);
-                                                string name = text[0].Trim();
-                                                int corpus = int.Parse(text[1].Trim());
-                                                int floor = int.Parse(text[2].Trim());
-                                                string description = text[3].Trim();
-                                                int type = int.Parse(text[4].Trim());
-                                                Console.WriteLine($"{name},{corpus},{floor},{description},{type}");
-                                                if (AddNewPlace(name, corpus, floor, description, type))
+                                                if (string.IsNullOrWhiteSpace(msg.Text))
+                                                {
+                                                    await EditOrSendMessage(msg, "ошибка! название не может быть пустым");
+                                                    usersState[foundUser.UserID].Action = null;
+                                                    break;
+                                                }
+                                                usersState[foundUser.UserID].TempData.Name = msg.Text.Trim();
+                                                usersState[foundUser.UserID].Action = UserAction.CorpusRequest;
+                                                await EditOrSendMessage(msg, "введите корпус");
+                                                break;
+                                            }
+                                        case (UserAction.CorpusRequest):
+                                            {
+                                                if (!int.TryParse(msg.Text?.Trim(), out int corpus))
+                                                {
+                                                    await EditOrSendMessage(msg, "ошибка! неправильный ввод");
+                                                    usersState[foundUser.UserID].Action = null;
+                                                    break;
+                                                }
+                                                usersState[foundUser.UserID].TempData.Corpus = corpus;
+                                                usersState[foundUser.UserID].Action = UserAction.FloorRequest;
+                                                await EditOrSendMessage(msg, "введите этаж");
+                                                break;
+                                            }
+                                        case (UserAction.FloorRequest):
+                                            {
+                                                if (!int.TryParse(msg.Text?.Trim(), out int floor))
+                                                {
+                                                    await EditOrSendMessage(msg, "ошибка! неправильный ввод");
+                                                    usersState[foundUser.UserID].Action = null;
+                                                    break;
+                                                }
+
+                                                usersState[foundUser.UserID].TempData.Floor = floor;
+                                                usersState[foundUser.UserID].Action = UserAction.DescriptionRequest;
+                                                await EditOrSendMessage(msg, "введите описание");
+                                                break;
+                                            }
+                                        case (UserAction.DescriptionRequest):
+                                            {
+                                                if (string.IsNullOrWhiteSpace(msg.Text))
+                                                {
+                                                    await EditOrSendMessage(msg, "ошибка! описание не может быть пустым");
+                                                    usersState[foundUser.UserID].Action = null;
+                                                    break;
+                                                }
+                                                usersState[foundUser.UserID].TempData.Description = msg.Text.Trim();
+                                                usersState[foundUser.UserID].Action = UserAction.TypeRequest;
+                                                await EditOrSendMessage(msg, "введите тип точки питания:\n1 - буфет\n2 - столовая\n3 - продуктовый");
+                                                break;
+                                            }
+                                        case (UserAction.TypeRequest):
+                                            {
+                                                if (!int.TryParse(msg.Text?.Trim(), out int type) || type < 1 || type > 3)
+                                                {
+                                                    await EditOrSendMessage(msg, "ошибка! введите число от 1 до 3, где 1 - Буфет, 2 - Столовая, 3 - Продуктовый");
+                                                    usersState[foundUser.UserID].Action = null;
+                                                    break;
+                                                }
+
+                                                var placeData = usersState[foundUser.UserID].TempData;
+                                                Console.WriteLine($"{placeData.Name},{placeData.Corpus},{placeData.Floor},{placeData.Description},{type}");
+                                                if (AddNewPlace(placeData.Name, placeData.Corpus, placeData.Floor, placeData.Description, type))
                                                 {
                                                     switch (type)
                                                     {
                                                         case 1:
                                                             {
-                                                                ObjectLists.AddRangeList(new List<Buffet>(BasePlace.GetPlaceId(name, corpus, floor, type), name, corpus, floor));
+                                                                ObjectLists.AddRangeList<Buffet>([new(BasePlace.GetPlaceId(placeData.Name, placeData.Corpus, placeData.Floor, type), placeData.Name, placeData.Corpus, placeData.Floor,placeData.Description)]);
+                                                                break;
+                                                            }
+                                                        case 2:
+                                                            {
+                                                                ObjectLists.AddRangeList<Canteen>([new(BasePlace.GetPlaceId(placeData.Name, placeData.Corpus, placeData.Floor, type), placeData.Name, placeData.Corpus, placeData.Floor,placeData.Description)]);
+                                                                break;
+                                                            }
+                                                        case 3:
+                                                            {
+                                                                ObjectLists.AddRangeList<Grocery>([new(BasePlace.GetPlaceId(placeData.Name, placeData.Corpus, placeData.Floor, type), placeData.Name,placeData.Description)]);
                                                                 break;
                                                             }
                                                     }
                                                     Console.WriteLine("Таблица создана");
-                                                }
-                                                else
-                                                {
-                                                    Console.WriteLine("точка уже есть или не получилось создать...");
                                                 }
                                                 usersState[foundUser!.UserID].Action = null;
                                                 await EditOrSendMessage(msg, "Ну вроде сохранил", new InlineKeyboardButton[][]
