@@ -208,7 +208,7 @@ namespace OBED.Include
                                         int corpus = reader.GetInt32(3);
                                         string description = reader.GetString(4);
                                         int floor = reader.GetInt32(5);
-                                        list.Add(new Canteen(placeid, name, corpus, floor, description));
+                                        list.Add(new Canteen(placeid, name, corpus, floor, description,LoadAllReviews(placeid)));
                                     }
                                 }
 								ObjectLists.AddRangeList<Canteen>(list);
@@ -224,7 +224,7 @@ namespace OBED.Include
                                         int placeid = reader.GetInt32(0);
                                         string name = reader.GetString(1);
                                         string description = reader.GetString(4);
-                                        list.Add(new Grocery(placeid, name, description));
+                                        list.Add(new Grocery(placeid, name, description,LoadAllReviews(placeid)));
                                     }
                                 }
 								ObjectLists.AddRangeList<Grocery>(list);
