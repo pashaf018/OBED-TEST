@@ -190,7 +190,7 @@ namespace OBED.Include
                                         int corpus = reader.GetInt32(3);
                                         string description = reader.GetString(4);
                                         int floor = reader.GetInt32(5);
-										list.Add(new Buffet(placeid,name,corpus,floor,description));
+										list.Add(new Buffet(placeid,name,corpus,floor,description,LoadAllReviews(placeid)));
                                     }
                                 }
 								ObjectLists.AddRangeList<Buffet>(list);
@@ -234,6 +234,35 @@ namespace OBED.Include
 					
 				}
 			}
+        }
+
+		public static List<Review> LoadAllReviews(int pd)
+		{
+            string dbConnectionString = "Data Source=OBED_DB.db";
+			List<Review> list = [];
+			using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
+			{
+				connection.Open();
+                var command = new SqliteCommand();
+                command.Connection = connection;
+                command.CommandText = $@"SELECT * FROM Reviews WHERE Place_id LIKE {pd}";
+				using(SqliteDataReader reader = command.ExecuteReader())
+				{
+					if (reader.HasRows)
+					{
+						while (reader.Read())
+						{
+							long UserID = reader.GetInt64(1);
+							int Placeid = reader.GetInt32(2);
+							string com = reader.GetString(3);
+							int rate = reader.GetInt32(4);
+							DateTime date = reader.GetDateTime(5);
+							list.Add(new Review(Placeid, UserID, rate, com, date));
+						}
+					}
+				}
+            }
+			return list;
         }
 
 		public virtual bool AddReview(Review review)

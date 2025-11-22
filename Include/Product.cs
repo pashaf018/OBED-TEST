@@ -22,7 +22,7 @@ namespace OBED.Include
         //public static Product? Load()
         //{
         //    string dbConnectionString = "Data Source=OBED_DB.db";
-        //    using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
+        //    using (SqliteConnection connection = new SqliteConnection(dbConnectionString))
         //    {
         //        connection.Open();
         //        SqliteCommand command = new SqliteCommand();
@@ -30,16 +30,50 @@ namespace OBED.Include
         //    }
         //}
 
-        //public static bool Save(Product product)
-        //{
-        //    string dbConnectionString = "Data Source=OBED_DB.db";
-        //    using (SqliteConnection connection = new SqliteConnection(dbConnectionString))
-        //    {
-        //        connection.Open();
-        //        SqliteCommand command = new SqliteCommand();
-        //        command.Connection = connection;
-        //        command.CommandText = $@"CREATE TABLE IF NOT EXISTS "
-        //    }
-        //}
+        public static bool Save(Product product)
+        {
+            string dbConnectionString = "Data Source=OBED_DB.db";
+            using (SqliteConnection connection = new SqliteConnection(dbConnectionString))
+            {
+                connection.Open();
+                SqliteCommand command = new SqliteCommand();
+                command.Connection = connection;
+                command.CommandText = $@"CREATE TABLE IF NOT EXISTS ""Products"" (
+                                        	""Product_id""	INTEGER,
+                                        	""Place_id""	INTEGER,
+                                        	""Name""	TEXT NOT NULL DEFAULT 'Unkown',
+                                        	""Value""	INTEGER NOT NULL DEFAULT -1,
+                                        	""perGram""	INTEGER NOT NULL DEFAULT 0,
+                                        	""Type""	INTEGER NOT NULL DEFAULT 1,
+                                        	PRIMARY KEY(""Product_id"" AUTOINCREMENT),
+                                        	FOREIGN KEY(""Place_id"") REFERENCES ""Places""(""Place_id"") ON UPDATE CASCADE
+                                        );";
+                command.ExecuteNonQuery();
+                if (IfProductExists(product))
+                {
+                    return false;
+                }
+                int pg = 0;
+                if (product.Price.perGram) { pg = 1; }
+                
+                command.CommandText = $@"INSERT INTO Products(Place_id,Name,Value,perGram,Type) VALUES ({product.Place_id},{product.Name},{product.Price.value},{pg},{(int) product.Type})";
+                int number = command.ExecuteNonQuery();
+                Console.WriteLine($"Добавлено элементов: {number}");
+                return true;
+            }
+        }
+
+        public static bool IfProductExists(Product product)
+        {
+            string dbConnectionString = "Data Source=OBED_DB.db";
+            using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
+            {
+                connection.Open();
+                SqliteCommand command = new SqliteCommand();
+                command.Connection = connection;
+                command.CommandText = $@"SELECT 1 FROM Products WHERE Name LIKE '{product.Name}' AND Place_id LIKE {product.Place_id}";
+                return command.ExecuteScalar() != null;
+            }
+        }
     }
 }
