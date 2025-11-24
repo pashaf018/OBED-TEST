@@ -2527,11 +2527,8 @@ class Program
             {
                 while (reader.Read())
                 {
-                    if (reader.HasRows)
-                    {
-                        string role = reader.GetString(0);
-                        return role;
-                    }
+                    string role = reader.GetString(0);
+                    return role;
                 }
             }
         }

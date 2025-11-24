@@ -8,6 +8,7 @@ namespace OBED.Include
 	/// <summary>
 	/// Тип сортировки отзывов.
 	/// </summary>
+	
 	public enum ReviewSort
 	{
 		/// <summary>Сортировка по убыванию рейтинга.</summary>
@@ -53,7 +54,8 @@ namespace OBED.Include
 
 	abstract class BasePlace(int placeid,string name, string? description = null, List<Review>? reviews = null, List<Product>? menu = null, List<string>? tegs = null)
 	{
-		public int Place_id { get; private set; } = placeid;
+        private static readonly string dbConnectionString = "Data Source=OBED_DB.db";
+        public int Place_id { get; private set; } = placeid;
 		public string Name { get; private set; } = name;
 		public string? Description { get; private set; } = description;
 
@@ -69,8 +71,6 @@ namespace OBED.Include
 
 		public virtual bool Save(Review review)
 		{
-
-			string dbConnectionString = "Data Source=OBED_DB.db";
 			if (review.UserID <= 0)
 				throw new ArgumentException("UserID должно быть больше 0", nameof(review.UserID));
 			if (review.Rating < 1 || review.Rating > 10)
@@ -113,7 +113,6 @@ namespace OBED.Include
 
 		public virtual Review? Load(int Place_id,long UserID)
 		{
-			string dbConnectionString = "Data Source=OBED_DB.db";
 			Review review = null;
 			using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
 			{
@@ -148,7 +147,6 @@ namespace OBED.Include
 			{
                 throw new ArgumentException("type - 1(Буфет), 2(Столовая) или 3(Продуктовый)", nameof(type));
             }
-            string dbConnectionString = "Data Source=OBED_DB.db";
 			int placeid = 0;
             using (SqliteConnection connection = new SqliteConnection(dbConnectionString))
             {
@@ -174,7 +172,6 @@ namespace OBED.Include
 
 		public static void LoadAllPlaces(int type)
 		{
-            string dbConnectionString = "Data Source=OBED_DB.db";
 			using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
 			{
 				connection.Open();
@@ -189,53 +186,44 @@ namespace OBED.Include
 						case 1:
 							{
 								List<Buffet> list = [];
-                                if (reader.HasRows)
-                                {
-                                    while (reader.Read())
-                                    {
-                                        int placeid = reader.GetInt32(0);
-                                        string name = reader.GetString(1);
-                                        int corpus = reader.GetInt32(3);
-                                        string description = reader.GetString(4);
-                                        int floor = reader.GetInt32(5);
-										list.Add(new Buffet(placeid,name,corpus,floor,description,LoadAllReviews(placeid),Product.LoadAllProducts(placeid)));
-                                    }
-                                }
-								ObjectLists.AddRangeList<Buffet>(list);
+								while (reader.Read())
+								{
+									int placeid = reader.GetInt32(0);
+									string name = reader.GetString(1);
+									int corpus = reader.GetInt32(3);
+									string description = reader.GetString(4);
+									int floor = reader.GetInt32(5);
+									list.Add(new Buffet(placeid, name, corpus, floor, description, LoadAllReviews(placeid), Product.LoadAllProducts(placeid)));
+								}
+								ObjectLists.AddRangeList(list);
                                 break;
 							}
 						case 2:
 							{
 								List<Canteen> list = [];
-                                if (reader.HasRows)
-                                {
-                                    while (reader.Read())
-                                    {
-                                        int placeid = reader.GetInt32(0);
-                                        string name = reader.GetString(1);
-                                        int corpus = reader.GetInt32(3);
-                                        string description = reader.GetString(4);
-                                        int floor = reader.GetInt32(5);
-                                        list.Add(new Canteen(placeid, name, corpus, floor, description,LoadAllReviews(placeid), Product.LoadAllProducts(placeid)));
-                                    }
-                                }
-								ObjectLists.AddRangeList<Canteen>(list);
+								while (reader.Read())
+								{
+									int placeid = reader.GetInt32(0);
+									string name = reader.GetString(1);
+									int corpus = reader.GetInt32(3);
+									string description = reader.GetString(4);
+									int floor = reader.GetInt32(5);
+									list.Add(new Canteen(placeid, name, corpus, floor, description, LoadAllReviews(placeid), Product.LoadAllProducts(placeid)));
+								}
+								ObjectLists.AddRangeList(list);
 								break;
                             }
 						case 3:
 							{
 								List<Grocery> list = [];
-                                if (reader.HasRows)
-                                {
-                                    while (reader.Read())
-                                    {
-                                        int placeid = reader.GetInt32(0);
-                                        string name = reader.GetString(1);
-                                        string description = reader.GetString(4);
-                                        list.Add(new Grocery(placeid, name, description,LoadAllReviews(placeid), Product.LoadAllProducts(placeid)));
-                                    }
-                                }
-								ObjectLists.AddRangeList<Grocery>(list);
+								while (reader.Read())
+								{
+									int placeid = reader.GetInt32(0);
+									string name = reader.GetString(1);
+									string description = reader.GetString(4);
+									list.Add(new Grocery(placeid, name, description, LoadAllReviews(placeid), Product.LoadAllProducts(placeid)));
+								}
+								ObjectLists.AddRangeList(list);
 								break;
                             }
 					}
@@ -246,7 +234,6 @@ namespace OBED.Include
 
 		public static List<Review> LoadAllReviews(int pd)
 		{
-            string dbConnectionString = "Data Source=OBED_DB.db";
 			List<Review> list = [];
 			using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
 			{
@@ -259,15 +246,12 @@ namespace OBED.Include
 				{
 					while (reader.Read())
 					{
-						if (reader.HasRows)
-						{
-							long UserID = reader.GetInt64(1);
-							int Placeid = reader.GetInt32(2);
-							string com = reader.GetString(3);
-							int rate = reader.GetInt32(4);
-							DateTime date = reader.GetDateTime(5);
-							list.Add(new Review(Placeid, UserID, rate, com, date));
-						}
+						long UserID = reader.GetInt64(1);
+						int Placeid = reader.GetInt32(2);
+						string com = reader.GetString(3);
+						int rate = reader.GetInt32(4);
+						DateTime date = reader.GetDateTime(5);
+						list.Add(new Review(Placeid, UserID, rate, com, date));
 					}
 				}
             }
@@ -322,7 +306,6 @@ namespace OBED.Include
 
 		public virtual bool RemoveReviewFromBD(Review review)
 		{
-            string dbConnectionString = "Data Source=OBED_DB.db";
 			using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
 			{
 				connection.Open();
@@ -339,8 +322,6 @@ namespace OBED.Include
 		public virtual Review? GetReview(long userID) => Reviews.FirstOrDefault(x => x.UserID == userID);
         private static bool IfUserHaveReviewOnPlace(long UserID, int Place)
         {
-
-            string dbConnectionString = "Data Source=OBED_DB.db";
             using (SqliteConnection connection = new SqliteConnection(dbConnectionString))
             {
                 connection.Open();

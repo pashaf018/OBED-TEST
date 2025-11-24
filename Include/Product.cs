@@ -12,6 +12,7 @@ namespace OBED.Include
 
     class Product(int placeid, string name, ProductType type, (float value, bool perGram) price)
     {
+        private static readonly string dbConnectionString = "Data Source=OBED_DB.db";
         public int Place_id { get; private set; } = placeid;
         public string Name { get; init; } = name;
         public (float value, bool perGram) Price { get; private set; } = price;
@@ -32,7 +33,6 @@ namespace OBED.Include
 
         public static bool Save(Product product)
         {
-            string dbConnectionString = "Data Source=OBED_DB.db";
             using (SqliteConnection connection = new SqliteConnection(dbConnectionString))
             {
                 connection.Open();
@@ -70,7 +70,6 @@ namespace OBED.Include
 
         public static List<Product> LoadAllProducts(int placeid)
         {
-            string dbConnectionString = "Data Source=OBED_DB.db";
             List<Product> list = [];
             using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
             {
@@ -83,24 +82,21 @@ namespace OBED.Include
                 {
                     while (reader.Read())
                     {
-                        if (reader.HasRows)
-                        {
-                            string name = reader.GetString(2);
-                            float value = reader.GetFloat(3);
-                            bool perGram = reader.GetInt32(4) != 0;
-                            ProductType type = (ProductType)reader.GetInt32(5);
-                            list.Add(new Product(placeid, name, type, (value, perGram)));
+                        string name = reader.GetString(2);
+                        float value = reader.GetFloat(3);
+                        bool perGram = reader.GetInt32(4) != 0;
+                        ProductType type = (ProductType)reader.GetInt32(5);
+                        list.Add(new Product(placeid, name, type, (value, perGram)));
 
-                        }
                     }
                 }
+                connection.Close();
             }
             return list;
         }
 
         public static bool IfProductExists(Product product)
         {
-            string dbConnectionString = "Data Source=OBED_DB.db";
             using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
             {
                 connection.Open();
@@ -109,7 +105,9 @@ namespace OBED.Include
                 command.CommandText = $@"SELECT 1 FROM Products WHERE Name = @name AND Place_id = @placeid";
                 command.Parameters.Add(new SqliteParameter("@name", product.Name));
                 command.Parameters.Add(new SqliteParameter("@placeid", product.Place_id));
-                return command.ExecuteScalar() != null;
+                bool t = command.ExecuteScalar() != null;
+                connection.Close();
+                return t;
             }
         }
     }
