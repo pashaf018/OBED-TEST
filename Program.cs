@@ -2476,6 +2476,23 @@ class Program
         }
     }
 
+    
+
+    private static bool deleteReview(int Review_id)
+    {
+        using (SqliteConnection connection = new SqliteConnection(dbConnectionString))
+        {
+            connection.Open();
+            var command = new SqliteCommand();
+            command.Connection = connection;
+            command.CommandText =
+                $@"DELETE FROM ""Reviews""
+                   WHERE ""Review_id"" = {Review_id};";
+            command.ExecuteNonQuery();
+            return true;
+        }
+    }
+
     private static string checkUserRole(long UserID)
     {
         using(var connection = new SqliteConnection(dbConnectionString))
@@ -2497,4 +2514,50 @@ class Program
         return "Unknown";
     }
 
+    private static bool AddNewPlace(string name,int corpus,int floor,string description,int type)
+    {
+        using(var connection = new SqliteConnection(dbConnectionString))
+        {
+            connection.Open();
+            var command = new SqliteCommand();
+            command.Connection = connection;
+            command.CommandText =
+                @"CREATE TABLE IF NOT EXISTS ""Places"" (
+                	""Place_id""	INTEGER,
+                	""Name""	TEXT NOT NULL DEFAULT 'UnknownPlace',
+                	""Type""	INTEGER,
+                	""Corpus""	INTEGER,
+                	""Description""	TEXT NOT NULL DEFAULT 'Description',
+                	""Floor""	INTEGER,
+                	PRIMARY KEY(""Place_id"" AUTOINCREMENT)
+                );";
+            command.ExecuteNonQuery();
+            if (ifPlaceExists(corpus,floor,name))
+            {
+                return false;
+            }
+            command.CommandText =
+                @"INSERT INTO Places(Name,Type,Corpus,Description,Floor) VALUES (@name,@type,@corpus,@description,@floor)";
+            command.Parameters.Add(new SqliteParameter("@name", name));
+            command.Parameters.Add(new SqliteParameter("@corpus", corpus));
+            command.Parameters.Add(new SqliteParameter("@floor", floor));
+            command.Parameters.Add(new SqliteParameter("@description", description));
+            command.Parameters.Add(new SqliteParameter("@type", type));
+            int number = command.ExecuteNonQuery();
+            Console.WriteLine($"Кол-во добавленных элементов: {number}");
+            return true;
+        }
+    }
+
+    private static bool ifPlaceExists(int corpus,int floor,string name)
+    {
+        using(var connection = new SqliteConnection(dbConnectionString))
+        {
+            connection.Open();
+            var command = new SqliteCommand();
+            command.Connection = connection;
+            command.CommandText = $@"SELECT 1 FROM Places WHERE ""Corpus"" LIKE {corpus} AND ""Floor"" LIKE {floor} AND ""Name"" LIKE '{name}'";
+            return command.ExecuteScalar() != null;
+        }
+    }
 }
