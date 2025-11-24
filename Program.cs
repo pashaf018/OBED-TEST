@@ -20,7 +20,6 @@ class Program
         var meBot = await bot.GetMe();
 
         // TODO: переход на SQL
-        Product.Save(new Product(10, "Супчик",ProductType.MainDish, (100f, false)));
         BasePlace.LoadAllPlaces(2);
         BasePlace.LoadAllPlaces(1);
         BasePlace.LoadAllPlaces(3);
@@ -1113,8 +1112,45 @@ class Program
                                         [("Меню блокировок", "/admin ban")],
                                         [("Обновить админ-меню", "/admin")],
                                         [("Добавить точку питания","/admin add")],
+                                        [("Добавить продукт к точке питания","/admin adm")],
                                         [("Назад", $"/start")]
                                     }, ParseMode.Html);
+                                    break;
+                                }
+                            case ("adm"):
+                                {
+                                    await EditOrSendMessage(msg,"Эта штука ещё не реализована", new InlineKeyboardButton[][]
+                                        {
+                                        [("Назад","/start")]
+                                        });
+                                    break;
+                                    switch (usersState[foundUser!.UserID].Action)
+                                    {
+                                        case (null):
+                                            {
+                                                await EditOrSendMessage(msg, "Выбор типа точек", new InlineKeyboardButton[][]
+                                                     {
+                                                          [("Столовые", "/admin adm C")],
+                                                          [("Буфеты", "/admin adm C")],
+                                                          [("Внешние магазины", "/admin adm G")],
+                                                          [("Назад", "/start")]
+                                                     });
+                                                usersState[foundUser!.UserID].Action = UserAction.ProductNameRequest;
+                                                break;
+                                            }
+                                        case (UserAction.ProductPlaceRequest):
+                                            {
+                                                switch (args[4])
+                                                {
+                                                    case ('C'):
+                                                        {
+
+                                                            break; ;
+                                                        }
+                                                }
+                                                break;
+                                            }
+                                    }
                                     break;
                                 }
                             case ("chk"):

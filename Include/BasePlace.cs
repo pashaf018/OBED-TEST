@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
+using System.Data.Common;
 using System.Xml.Linq;
 using Telegram.Bot.Types;
 
@@ -113,23 +114,28 @@ namespace OBED.Include
 		public virtual Review? Load(int Place_id,long UserID)
 		{
 			string dbConnectionString = "Data Source=OBED_DB.db";
-			Review review = new Review(0,0,0,"");
+			Review review = null;
 			using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
 			{
 				connection.Open();
 				var command = new SqliteCommand();
 				command.Connection = connection;
-				command.CommandText = $@"SELECT Place_id,Users_id,Comment,Rating,Date FROM Reviews WHERE Place_id LIKE {Place_id} AND Users_id LIKE {UserID}";
-				using (SqliteDataReader reader = command.ExecuteReader())
+				command.CommandText = $@"SELECT Place_id,Users_id,Comment,Rating,Date FROM Reviews WHERE Place_id = @Place_id AND Users_id = @UserID";
+				command.Parameters.Add(new SqliteParameter("@Place_id", Place_id));
+                command.Parameters.Add(new SqliteParameter("@UserID", UserID));
+                using (SqliteDataReader reader = command.ExecuteReader())
 				{
-					if (reader.HasRows)
+					while (reader.Read())
 					{
-						int id = reader.GetInt32(0);
-						long userid = reader.GetInt64(1);
-						string comment = reader.GetString(2);
-						int rating = reader.GetInt32(3);
-						DateTime date = reader.GetDateTime(4);
-						review = new Review(id, userid, rating, comment,date);
+						if (reader.HasRows)
+						{
+							int id = reader.GetInt32(0);
+							long userid = reader.GetInt64(1);
+							string comment = reader.GetString(2);
+							int rating = reader.GetInt32(3);
+							DateTime date = reader.GetDateTime(4);
+							review = new Review(id, userid, rating, comment, date);
+						}
 					}
 				}
 			}
@@ -149,16 +155,23 @@ namespace OBED.Include
                 connection.Open();
                 var command = new SqliteCommand();
                 command.Connection = connection;
-                command.CommandText = $@"SELECT Place_id FROM Places WHERE Name LIKE '{name}' AND Corpus LIKE {corpus} AND Floor LIKE {floor} AND Type LIKE {type}";
+                command.CommandText = $@"SELECT Place_id FROM Places WHERE Name = @name AND Corpus = @corpus AND Floor = @floor AND Type = @type";
+				command.Parameters.Add(new SqliteParameter("@name", name));
+                command.Parameters.Add(new SqliteParameter("@corpus", corpus));
+                command.Parameters.Add(new SqliteParameter("@floor", floor));
+                command.Parameters.Add(new SqliteParameter("@type", type));
                 using (SqliteDataReader reader = command.ExecuteReader())
                 {
-                    if (reader.HasRows)
-                    {
-						placeid = reader.GetInt32(0);
-						Console.WriteLine($"!!!!!!!  {placeid} !!!!!!!!!!!!!!!");
-						return placeid;
-						
-                    }
+					while (reader.Read())
+					{
+						if (reader.HasRows)
+						{
+							placeid = reader.GetInt32(0);
+							Console.WriteLine($"!!!!!!!  {placeid} !!!!!!!!!!!!!!!");
+							return placeid;
+
+						}
+					}
                 }
             }
             Console.WriteLine($"!!!!!!!  {placeid} !!!!!!!!!!!!!!!");
@@ -173,8 +186,9 @@ namespace OBED.Include
 				connection.Open();
 				var command = new SqliteCommand();
 				command.Connection = connection;
-				command.CommandText = $@"SELECT * FROM Places WHERE Type = {type}";
-				using(SqliteDataReader reader = command.ExecuteReader())
+				command.CommandText = $@"SELECT * FROM Places WHERE Type = @type";
+                command.Parameters.Add(new SqliteParameter("@type", type));
+                using (SqliteDataReader reader = command.ExecuteReader())
 				{
 					switch (type)
 					{
@@ -245,8 +259,9 @@ namespace OBED.Include
 				connection.Open();
                 var command = new SqliteCommand();
                 command.Connection = connection;
-                command.CommandText = $@"SELECT * FROM Reviews WHERE Place_id LIKE {pd}";
-				using(SqliteDataReader reader = command.ExecuteReader())
+                command.CommandText = $@"SELECT * FROM Reviews WHERE Place_id = @pd";
+                command.Parameters.Add(new SqliteParameter("@pd", pd));
+                using (SqliteDataReader reader = command.ExecuteReader())
 				{
 					if (reader.HasRows)
 					{
@@ -304,11 +319,29 @@ namespace OBED.Include
 				if (reviewToRemove != null)
 				{
 					Reviews.Remove(reviewToRemove);
+					RemoveReviewFromBD(reviewToRemove);
 					return true;
 				}
 				return false;
 			}
 		}
+
+		public virtual bool RemoveReviewFromBD(Review review)
+		{
+            string dbConnectionString = "Data Source=OBED_DB.db";
+			using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
+			{
+				connection.Open();
+				var command = new SqliteCommand();
+				command.Connection = connection;
+				command.CommandText = $@"DELETE FROM Reviews WHERE Place_id = @Place_id AND Users_id = @UserID";
+                command.Parameters.Add(new SqliteParameter("@Place_id", review.Place_Id));
+                command.Parameters.Add(new SqliteParameter("@UserID", review.UserID));
+                int number = command.ExecuteNonQuery();
+				return number != 0;
+			}
+        }
+
 		public virtual Review? GetReview(long userID) => Reviews.FirstOrDefault(x => x.UserID == userID);
         private static bool IfUserHaveReviewOnPlace(long UserID, int Place)
         {
@@ -322,7 +355,9 @@ namespace OBED.Include
 
                 command.CommandText =
                     $@"SELECT 1 FROM Reviews WHERE
-                    ""Users_id"" LIKE {UserID} AND ""Place_id"" LIKE '{Place}'";
+                    ""Users_id"" = @UserID AND ""Place_id"" = @place";
+				command.Parameters.Add(new SqliteParameter("@UserID", UserID));
+                command.Parameters.Add(new SqliteParameter("@place", Place));
                 return command.ExecuteScalar() != null;
             }
         }

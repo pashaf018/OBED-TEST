@@ -56,7 +56,12 @@ namespace OBED.Include
                 int pg = 0;
                 if (product.Price.perGram) { pg = 1; }
                 
-                command.CommandText = $@"INSERT INTO Products(Place_id,Name,Value,perGram,Type) VALUES ({product.Place_id},'{product.Name}',{product.Price.value},{pg},{(int) product.Type})";
+                command.CommandText = $@"INSERT INTO Products(Place_id,Name,Value,perGram,Type) VALUES (@placeid,@name,@value,@pg,@type)";
+                command.Parameters.Add(new SqliteParameter("@placeid", product.Place_id));
+                command.Parameters.Add(new SqliteParameter("@name", product.Name));
+                command.Parameters.Add(new SqliteParameter("@value", product.Price.value));
+                command.Parameters.Add(new SqliteParameter("@pg", pg));
+                command.Parameters.Add(new SqliteParameter("@type", (int) product.Type));
                 int number = command.ExecuteNonQuery();
                 Console.WriteLine($"Добавлено элементов: {number}");
                 return true;
@@ -72,7 +77,8 @@ namespace OBED.Include
                 connection.Open();
                 var command = new SqliteCommand();
                 command.Connection = connection;
-                command.CommandText = $@"SELECT * FROM Products WHERE Place_id LIKE {placeid}";
+                command.CommandText = $@"SELECT * FROM Products WHERE Place_id = @placeid";
+                command.Parameters.Add(new SqliteParameter("@placeid", placeid));
                 command.ExecuteNonQuery();
                 using(SqliteDataReader reader = command.ExecuteReader())
                 {
@@ -100,7 +106,9 @@ namespace OBED.Include
                 connection.Open();
                 SqliteCommand command = new SqliteCommand();
                 command.Connection = connection;
-                command.CommandText = $@"SELECT 1 FROM Products WHERE Name LIKE '{product.Name}' AND Place_id LIKE {product.Place_id}";
+                command.CommandText = $@"SELECT 1 FROM Products WHERE Name = @name AND Place_id = @placeid";
+                command.Parameters.Add(new SqliteParameter("@name", product.Name));
+                command.Parameters.Add(new SqliteParameter("@placeid", product.Place_id));
                 return command.ExecuteScalar() != null;
             }
         }

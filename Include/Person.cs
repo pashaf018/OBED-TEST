@@ -62,7 +62,12 @@ namespace OBED.Include
         CorpusRequest,
         FloorRequest,
         DescriptionRequest,
-        TypeRequest
+        TypeRequest,
+		ProductNameRequest,
+		ProductValueRequest,
+		ProductperGramRequest,
+		ProductTypeRequest,
+		ProductPlaceRequest
     }
 	class UserState
 	{
