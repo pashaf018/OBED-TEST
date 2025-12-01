@@ -1121,34 +1121,34 @@ class Program
 										[("Назад","/start")]
 										});
 									break;
-									switch (usersState[foundUser!.UserID].Action)
-									{
-										case (null):
-											{
-												await EditOrSendMessage(msg, "Выбор типа точек", new InlineKeyboardButton[][]
-													 {
-														  [("Столовые", "/admin adm C")],
-														  [("Буфеты", "/admin adm C")],
-														  [("Внешние магазины", "/admin adm G")],
-														  [("Назад", "/start")]
-													 });
-												usersState[foundUser!.UserID].Action = UserAction.ProductNameRequest;
-												break;
-											}
-										case (UserAction.ProductPlaceRequest):
-											{
-												switch (args[4])
-												{
-													case ('C'):
-														{
+									//switch (usersState[foundUser!.UserID].Action)
+									//{
+									//	case (null):
+									//		{
+									//			await EditOrSendMessage(msg, "Выбор типа точек", new InlineKeyboardButton[][]
+									//				 {
+									//					  [("Столовые", "/admin adm C")],
+									//					  [("Буфеты", "/admin adm C")],
+									//					  [("Внешние магазины", "/admin adm G")],
+									//					  [("Назад", "/start")]
+									//				 });
+									//			usersState[foundUser!.UserID].Action = UserAction.ProductNameRequest;
+									//			break;
+									//		}
+									//	case (UserAction.ProductPlaceRequest):
+									//		{
+									//			switch (args[4])
+									//			{
+									//				case ('C'):
+									//					{
 
-															break; ;
-														}
-												}
-												break;
-											}
-									}
-									break;
+									//						break; ;
+									//					}
+									//			}
+									//			break;
+									//		}
+									//}
+									//break;
 								}
 							case ("chk"):
 								{
@@ -2530,17 +2530,14 @@ class Program
 						case ("CommonUser"):
 							{
 								return RoleType.CommonUser;
-								break;
 							}
 						case ("VipUser"):
 							{
 								return RoleType.VipUser;
-								break;
 							}
 						case ("Administrator"):
 							{
 								return RoleType.Administrator;
-								break;
 							}
 					}
 				}
@@ -2549,7 +2546,7 @@ class Program
 		return RoleType.CommonUser;
 	}
 
-	private static int? AddNewPlace(string name, int corpus, int floor, string description, int type)
+	private static long? AddNewPlace(string name, int corpus, int floor, string description, int type)
 	{
 		using (var connection = new SqliteConnection(dbConnectionString))
 		{
@@ -2581,7 +2578,7 @@ class Program
 			int number = command.ExecuteNonQuery();
 			Console.WriteLine($"Кол-во добавленных элементов: {number}");
 			command.CommandText = "SELECT last_insert_rowid()";
-			int placeid = (int)command.ExecuteScalar();
+			long placeid = (long)command.ExecuteScalar();
 			return placeid;
 		}
 	}

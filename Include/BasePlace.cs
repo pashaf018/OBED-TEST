@@ -30,14 +30,14 @@ namespace OBED.Include
 
     class Review
 	{
-		public int Place_Id { get; private set; }
+		public long Place_Id { get; private set; }
 		public long UserID { get; init; }
 		public int Rating { get; private set; }
 		public string? Comment { get; private set; }
 
 		public DateTime? Date { get; private set; }
 
-		public Review(int placeid,long userID, int rating, string? comment = null, DateTime? date = null)
+		public Review(long placeid,long userID, int rating, string? comment = null, DateTime? date = null)
 		{
 			if (userID <= 0)
 				throw new ArgumentException("UserID должно быть больше 0", nameof(userID));
@@ -52,10 +52,10 @@ namespace OBED.Include
 		}
 	}
 
-	abstract class BasePlace(int placeid,string name, string? description = null, List<Review>? reviews = null, List<Product>? menu = null, List<string>? tegs = null)
+	abstract class BasePlace(long placeid,string name, string? description = null, List<Review>? reviews = null, List<Product>? menu = null, List<string>? tegs = null)
 	{
         private static readonly string dbConnectionString = "Data Source=OBED_DB.db";
-        public int Place_id { get; private set; } = placeid;
+        public long Place_id { get; private set; } = placeid;
 		public string Name { get; private set; } = name;
 		public string? Description { get; private set; } = description;
 
@@ -111,7 +111,7 @@ namespace OBED.Include
 			}
 		}
 
-		public virtual Review? Load(int Place_id,long UserID)
+		public virtual Review? Load(long Place_id,long UserID)
 		{
 			Review review = null;
 			using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
@@ -141,13 +141,13 @@ namespace OBED.Include
 			return review;
 		}
 
-		public static int GetPlaceId(string name,int corpus, int floor, int type)
+		public static long GetPlaceId(string name,int corpus, int floor, int type)
 		{
 			if(type <= 0 || type > 3)
 			{
                 throw new ArgumentException("type - 1(Буфет), 2(Столовая) или 3(Продуктовый)", nameof(type));
             }
-			int placeid = 0;
+			long placeid = 0;
             using (SqliteConnection connection = new SqliteConnection(dbConnectionString))
             {
                 connection.Open();
@@ -162,7 +162,7 @@ namespace OBED.Include
                 {
 					while (reader.Read())
 					{
-							placeid = reader.GetInt32(0);
+							placeid = reader.GetInt64(0);
 							return placeid;
 					}
                 }
@@ -188,7 +188,7 @@ namespace OBED.Include
 								List<Buffet> list = [];
 								while (reader.Read())
 								{
-									int placeid = reader.GetInt32(0);
+									long placeid = reader.GetInt64(0);
 									string name = reader.GetString(1);
 									int corpus = reader.GetInt32(3);
 									string description = reader.GetString(4);
@@ -203,7 +203,7 @@ namespace OBED.Include
 								List<Canteen> list = [];
 								while (reader.Read())
 								{
-									int placeid = reader.GetInt32(0);
+									long placeid = reader.GetInt64(0);
 									string name = reader.GetString(1);
 									int corpus = reader.GetInt32(3);
 									string description = reader.GetString(4);
@@ -232,7 +232,7 @@ namespace OBED.Include
 			}
         }
 
-		public static List<Review> LoadAllReviews(int pd)
+		public static List<Review> LoadAllReviews(long pd)
 		{
 			List<Review> list = [];
 			using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
@@ -247,7 +247,7 @@ namespace OBED.Include
 					while (reader.Read())
 					{
 						long UserID = reader.GetInt64(1);
-						int Placeid = reader.GetInt32(2);
+						long Placeid = reader.GetInt64(2);
 						string com = reader.GetString(3);
 						int rate = reader.GetInt32(4);
 						DateTime date = reader.GetDateTime(5);
@@ -273,7 +273,7 @@ namespace OBED.Include
 				return false;
 			}
 		}
-		public virtual bool AddReview(int placeid,long userID, int rating, string? comment)
+		public virtual bool AddReview(long placeid,long userID, int rating, string? comment)
 		{
 			lock (reviewLock)
 			{
@@ -320,7 +320,7 @@ namespace OBED.Include
         }
 
 		public virtual Review? GetReview(long userID) => Reviews.FirstOrDefault(x => x.UserID == userID);
-        private static bool IfUserHaveReviewOnPlace(long UserID, int Place)
+        private static bool IfUserHaveReviewOnPlace(long UserID, long Place)
         {
             using (SqliteConnection connection = new SqliteConnection(dbConnectionString))
             {
