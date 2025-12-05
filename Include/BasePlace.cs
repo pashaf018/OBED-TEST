@@ -133,7 +133,7 @@ namespace OBED.Include
 					{
 						if (reader.HasRows)
 						{
-							int id = reader.GetInt32(0);
+							long id = reader.GetInt64(0);
 							long userid = reader.GetInt64(1);
 							string comment = reader.GetString(2);
 							int rating = reader.GetInt32(3);
