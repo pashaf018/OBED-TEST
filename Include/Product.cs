@@ -38,17 +38,7 @@ namespace OBED.Include
                 connection.Open();
                 SqliteCommand command = new SqliteCommand();
                 command.Connection = connection;
-                command.CommandText = $@"CREATE TABLE IF NOT EXISTS ""Products"" (
-                                        	""Product_id""	INTEGER,
-                                        	""Place_id""	INTEGER,
-                                        	""Name""	TEXT NOT NULL DEFAULT 'Unkown',
-                                        	""Value""	REAL NOT NULL DEFAULT -1.0,
-                                        	""perGram""	INTEGER NOT NULL DEFAULT 0,
-                                        	""Type""	INTEGER NOT NULL DEFAULT 0,
-                                        	PRIMARY KEY(""Product_id"" AUTOINCREMENT),
-                                        	FOREIGN KEY(""Place_id"") REFERENCES ""Places""(""Place_id"") ON UPDATE CASCADE
-                                        );";
-                command.ExecuteNonQuery();
+                CreateTableProducts(command);
                 if (IfProductExists(product))
                 {
                     return false;
@@ -67,6 +57,21 @@ namespace OBED.Include
                 return true;
             }
         }
+
+        public static void CreateTableProducts(SqliteCommand command)
+        {
+			command.CommandText = $@"CREATE TABLE IF NOT EXISTS ""Products"" (
+                                        	""Product_id""	INTEGER,
+                                        	""Place_id""	INTEGER,
+                                        	""Name""	TEXT NOT NULL DEFAULT 'Unkown',
+                                        	""Value""	REAL NOT NULL DEFAULT -1.0,
+                                        	""perGram""	INTEGER NOT NULL DEFAULT 0,
+                                        	""Type""	INTEGER NOT NULL DEFAULT 0,
+                                        	PRIMARY KEY(""Product_id"" AUTOINCREMENT),
+                                        	FOREIGN KEY(""Place_id"") REFERENCES ""Places""(""Place_id"") ON UPDATE CASCADE
+                                        );";
+			command.ExecuteNonQuery();
+		}
 
         public static List<Product> LoadAllProducts(long placeid)
         {

@@ -19,6 +19,19 @@ class Program
 		var meBot = await bot.GetMe();
 
 		// TODO: переход на SQL
+		using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
+		{
+			connection.Open();
+			using(SqliteCommand command = new SqliteCommand())
+			{
+				command.Connection = connection;
+				CreateTableTGUsers(command);
+				CreateTablePlaces(command);
+				Product.CreateTableProducts(command);
+				BasePlace.CreateTableReviews(command);
+			}
+		}
+
 		BasePlace.LoadAllPlaces(2);
 		BasePlace.LoadAllPlaces(1);
 		BasePlace.LoadAllPlaces(3);
@@ -2471,15 +2484,7 @@ class Program
 			using (SqliteCommand command = new SqliteCommand())
 			{
 				command.Connection = connection;
-				command.CommandText =
-					@"CREATE TABLE IF NOT EXISTS TG_Users (
-										List_id	INTEGER,
-									    Name	TEXT DEFAULT 'Unknown',
-										TG_id	INTEGER NOT NULL UNIQUE,
-										Role	TEXT NOT NULL DEFAULT 'CommonUser',
-										PRIMARY KEY(""List_id"" AUTOINCREMENT)
-										);";
-				command.ExecuteNonQuery();
+				CreateTableTGUsers(command);
 
 				if (ifUserExists(TG_id))
 				{
@@ -2498,6 +2503,21 @@ class Program
 			}
 		}
 	}
+
+	private static void CreateTableTGUsers(SqliteCommand command)
+	{
+
+		command.CommandText =
+					@"CREATE TABLE IF NOT EXISTS TG_Users (
+										List_id	INTEGER,
+									    Name	TEXT DEFAULT 'Unknown',
+										TG_id	INTEGER NOT NULL UNIQUE,
+										Role	TEXT NOT NULL DEFAULT 'CommonUser',
+										PRIMARY KEY(""List_id"" AUTOINCREMENT)
+										);";
+		command.ExecuteNonQuery();
+	}
+
 	private static bool ifUserExists(long TG_id)
 	{
 		using (SqliteConnection connection = new SqliteConnection(dbConnectionString))
@@ -2581,6 +2601,20 @@ class Program
 			long placeid = (long)command.ExecuteScalar();
 			return placeid;
 		}
+	}
+	private static void CreateTablePlaces(SqliteCommand command)
+	{
+		command.CommandText =
+				@"CREATE TABLE IF NOT EXISTS ""Places"" (
+                	""Place_id""	INTEGER,
+                	""Name""	TEXT NOT NULL DEFAULT 'UnknownPlace',
+                	""Type""	INTEGER,
+                	""Corpus""	INTEGER,
+                	""Description""	TEXT NOT NULL DEFAULT 'Description',
+                	""Floor""	INTEGER,
+                	PRIMARY KEY(""Place_id"" AUTOINCREMENT)
+                );";
+		command.ExecuteNonQuery();
 	}
 
 	private static bool ifPlaceExists(int corpus, int floor, string name)

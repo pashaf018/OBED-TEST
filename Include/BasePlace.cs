@@ -81,19 +81,7 @@ namespace OBED.Include
 				var command = new SqliteCommand();
 				command.Connection = connection;
 				//Создание таблицы если её нету
-				command.CommandText =
-					@"CREATE TABLE IF NOT EXISTS ""Reviews"" (
-                    ""Review_id"" INTEGER,
-                	""Users_id""	INTEGER,
-                    ""Place_id"" INTEGER,
-                	""Comment""	TEXT,
-                	""Rating""	INTEGER NOT NULL,
-                    ""Date"" TEXT,
-                	FOREIGN KEY(""Users_id"") REFERENCES ""TG_Users""(""TG_id"") ON UPDATE CASCADE,
-                    FOREIGN KEY(""Place_id"") REFERENCES ""Places""(Place_id) ON UPDATE CASCADE,
-                    PRIMARY KEY(""Review_id"" AUTOINCREMENT)
-                );";
-				command.ExecuteNonQuery();
+				CreateTableReviews(command);
                 if (IfUserHaveReviewOnPlace(review.UserID, review.Place_Id))
 				{
 					return false;
@@ -109,6 +97,23 @@ namespace OBED.Include
 				Console.WriteLine($"Кол-во добавленных элементов: {number}");
 				return true;
 			}
+		}
+
+		public static void CreateTableReviews(SqliteCommand command)
+		{
+			command.CommandText =
+					@"CREATE TABLE IF NOT EXISTS ""Reviews"" (
+                    ""Review_id"" INTEGER,
+                	""Users_id""	INTEGER,
+                    ""Place_id"" INTEGER,
+                	""Comment""	TEXT,
+                	""Rating""	INTEGER NOT NULL,
+                    ""Date"" TEXT,
+                	FOREIGN KEY(""Users_id"") REFERENCES ""TG_Users""(""TG_id"") ON UPDATE CASCADE,
+                    FOREIGN KEY(""Place_id"") REFERENCES ""Places""(Place_id) ON UPDATE CASCADE,
+                    PRIMARY KEY(""Review_id"" AUTOINCREMENT)
+                );";
+			command.ExecuteNonQuery();
 		}
 
 		public virtual Review? Load(long Place_id,long UserID)
