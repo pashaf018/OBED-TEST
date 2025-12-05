@@ -135,7 +135,7 @@ namespace OBED.Include
 						{
 							long id = reader.GetInt64(0);
 							long userid = reader.GetInt64(1);
-							string comment = reader.GetString(2);
+							string? comment = reader.IsDBNull(2) ? null : reader.GetString(2);
 							int rating = reader.GetInt32(3);
 							DateTime date = reader.GetDateTime(4);
 							review = new Review(id, userid, rating, comment, date);
@@ -253,7 +253,7 @@ namespace OBED.Include
 					{
 						long UserID = reader.GetInt64(1);
 						long Placeid = reader.GetInt64(2);
-						string com = reader.GetString(3);
+						string? com = reader.IsDBNull(3) ? null : reader.GetString(3);
 						int rate = reader.GetInt32(4);
 						DateTime date = reader.GetDateTime(5);
 						list.Add(new Review(Placeid, UserID, rate, com, date));
