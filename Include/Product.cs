@@ -10,10 +10,10 @@ namespace OBED.Include
         Appetizer
     }
 
-    class Product(int placeid, string name, ProductType type, (float value, bool perGram) price)
+    class Product(long placeid, string name, ProductType type, (float value, bool perGram) price)
     {
         private static readonly string dbConnectionString = "Data Source=OBED_DB.db";
-        public int Place_id { get; private set; } = placeid;
+        public long Place_id { get; private set; } = placeid;
         public string Name { get; init; } = name;
         public (float value, bool perGram) Price { get; private set; } = price;
         public ProductType Type { get; init; } = type;
@@ -68,7 +68,7 @@ namespace OBED.Include
             }
         }
 
-        public static List<Product> LoadAllProducts(int placeid)
+        public static List<Product> LoadAllProducts(long placeid)
         {
             List<Product> list = [];
             using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
