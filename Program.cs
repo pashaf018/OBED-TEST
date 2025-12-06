@@ -7,14 +7,13 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
-class Program
+static class Program
 {
 	static async Task Main()
 	{
 		using var cts = new CancellationTokenSource();
 		var token = Environment.GetEnvironmentVariable("TOKEN");
 		var bot = new TelegramBotClient(token!, cancellationToken: cts.Token);
-		var meBot = await bot.GetMe();
 
 		// TODO: переход на SQL
 		List<Product> products1 = [new("Main1", ProductType.MainDish, (50, false)), new("Side1", ProductType.SideDish, (100, false)), new("Drink1", ProductType.Drink, (150, false)), new("Appetizer1", ProductType.Appetizer, (200, false)),
@@ -151,16 +150,15 @@ class Program
 			{
 				case { Type: { } mType }:
 					{
-						if (mType == MessageType.Text)
-							if (msg.Text![0] == '/')
-							{
-								var splitStr = msg.Text.Split(' ');
-								if (splitStr.Length > 1)
-									await OnCommand(splitStr[0].ToLower(), splitStr[1].ToLower(), msg);
-								else
-									await OnCommand(splitStr[0].ToLower(), null, msg);
-								break;
-							}
+						if (mType == MessageType.Text && msg.Text![0] == '/')
+						{
+							var splitStr = msg.Text.Split(' ');
+							if (splitStr.Length > 1)
+								await OnCommand(splitStr[0].ToLower(), splitStr[1].ToLower(), msg);
+							else
+								await OnCommand(splitStr[0].ToLower(), null, msg);
+							break;
+						}
 
 						ObjectLists.Persons.TryGetValue(msg.Chat.Id, out Person? foundUser);
 
@@ -319,7 +317,6 @@ class Program
 					}
 				case ("/help"):
 					{
-						// TODO: обращение "по кусочкам" для вывода справки
 						await EditOrSendMessage(msg, $"TODO: help", new InlineKeyboardButton[][]
 							{
 								[("Назад","/start")]
@@ -328,7 +325,6 @@ class Program
 					}
 				case ("/report"):
 					{
-						// TODO: Сообщать нам только о тех ошибках, которые реально мешают юзерам, а не о фантомных стикерах
 						await EditOrSendMessage(msg, $"TODO: report", new InlineKeyboardButton[][]
 							{
 								[("Назад","/start")]
@@ -354,7 +350,7 @@ class Program
 							{
 								("Назад", "/places")
 							});
-							throw new Exception($"No command args: {msg.Text}");
+							throw new ArgumentException("No command args", nameof(args));
 						}
 
 						int page = 0;
@@ -364,7 +360,7 @@ class Program
 							{
 								("Назад", "/places")
 							});
-							throw new Exception($"Invalid command agrs: {msg.Text}");
+							throw new ArgumentException("Invalid command args", nameof(args));
 						}
 						if (page < 0)
 							page = 0;
@@ -394,7 +390,7 @@ class Program
 									{
 										("Назад", "/places")
 									});
-									throw new Exception($"Invalid command agrs: {msg.Text}");
+									throw new ArgumentException("Invalid command args", nameof(args));
 								}
 						}
 
@@ -441,10 +437,10 @@ class Program
 							{
 								("Назад", "/places")
 							});
-							throw new Exception($"No command args: {msg.Text}");
+							throw new ArgumentException("No command args", nameof(args));
 						}
 
-						await EditOrSendMessage(msg, "Выбор точки", new InlineKeyboardButton[][]
+						await EditOrSendMessage(msg, "Выбор корпуса точки", new InlineKeyboardButton[][]
 						{
 							[("1", $"/placeSelector 1{args[0]}"), ("2", $"/placeSelector 2{args[0]}"), ("3", $"/placeSelector 3{args[0]}")],
 							[("4", $"/placeSelector 4{args[0]}"), ("5", $"/placeSelector 5{args[0]}"), ("6", $"/placeSelector 6{args[0]}")],
@@ -461,7 +457,7 @@ class Program
 							{
 								("Назад", "/places")
 							});
-							throw new Exception($"No command args: {msg.Text}");
+							throw new ArgumentException("No command args", nameof(args));
 						}
 
 						int index = 0, placeSelectorPage = 0;
@@ -473,7 +469,7 @@ class Program
 								{
 									("Назад", "/places")
 								});
-								throw new Exception($"Invalid command agrs: {msg.Text}");
+								throw new ArgumentException("Invalid command args", nameof(args));
 							}
 						}
 						else if (!char.IsLetter(args[1]) || !int.TryParse(args[2..], out index))
@@ -483,7 +479,7 @@ class Program
 							{
 								("Назад", "/places")
 							});
-							throw new Exception($"Invalid command agrs: {msg.Text}");
+							throw new ArgumentException("Invalid command args", nameof(args));
 						}
 
 						BasePlace place;
@@ -491,17 +487,17 @@ class Program
 						{
 							case ('C'):
 								{
-									place = ObjectLists.Canteens.ElementAt(index);
+									place = ObjectLists.Canteens[index];
 									break;
 								}
 							case ('B'):
 								{
-									place = ObjectLists.Buffets.ElementAt(index);
+									place = ObjectLists.Buffets[index];
 									break;
 								}
 							case ('G'):
 								{
-									place = ObjectLists.Groceries.ElementAt(index);
+									place = ObjectLists.Groceries[index];
 									break;
 								}
 							default:
@@ -510,7 +506,7 @@ class Program
 									{
 										("Назад", "/places")
 									});
-									throw new Exception($"Invalid command agrs: {msg.Text}");
+									throw new ArgumentException("Invalid command args", nameof(args));
 								}
 						}
 
@@ -518,7 +514,7 @@ class Program
 						Название: {place.Name}
 						Средний рейтинг: {(place.Reviews.Count != 0 ? $"{Math.Round((double)place.Reviews.Sum(x => x.Rating) / place.Reviews.Count, 2)}⭐" : "Отзывы не найдены")}
 						Всего отзывов: {place.Reviews.Count}
-						Последний текстовый отзыв: {((place.Reviews.Count != 0 && place.Reviews.Where(x => x.Comment != null).Any()) ? ($"{place.Reviews.Where(x => x.Comment != null).Last().Rating} ⭐️| {place.Reviews.Where(x => x.Comment != null).Last().Comment}") : "Отзывы с комментариями не найдены")}
+						Последний текстовый отзыв: {((place.Reviews.Count != 0 && place.Reviews.Any(x => x.Comment != null)) ? ($"{place.Reviews.Last(x => x.Comment != null).Rating} ⭐️| {place.Reviews.Last(x => x.Comment != null).Comment}") : "Отзывы с комментариями не найдены")}
 						""", new InlineKeyboardButton[][]
 						{
 							[("Меню", $"/menu -{args}")],
@@ -536,7 +532,7 @@ class Program
 							{
 								("Назад", "/places")
 							});
-							throw new Exception($"No command args: {msg.Text}");
+							throw new ArgumentException("No command args", nameof(args));
 						}
 
 						int index = 0, page = 0, placeSelectorPage = 0;
@@ -549,7 +545,7 @@ class Program
 								{
 									("Назад", "/places")
 								});
-								throw new Exception($"Invalid command agrs: {msg.Text}");
+								throw new ArgumentException("Invalid command args", nameof(args));
 							}
 						}
 						else if (!char.IsLetter(args[2]) || !int.TryParse(args[3..args.IndexOf('_')], out index)
@@ -559,7 +555,7 @@ class Program
 							{
 								("Назад", "/places")
 							});
-							throw new Exception($"Invalid command agrs: {msg.Text}");
+							throw new ArgumentException("Invalid command args", nameof(args));
 						}
 
 						if (page < 0)
@@ -572,20 +568,20 @@ class Program
 						{
 							case ('C'):
 								{
-									placeName = ObjectLists.Canteens.ElementAt(index).Name;
-									menu = ObjectLists.Canteens.ElementAt(index).Menu;
+									placeName = ObjectLists.Canteens[index].Name;
+									menu = ObjectLists.Canteens[index].Menu;
 									break;
 								}
 							case ('B'):
 								{
-									placeName = ObjectLists.Buffets.ElementAt(index).Name;
-									menu = ObjectLists.Buffets.ElementAt(index).Menu;
+									placeName = ObjectLists.Buffets[index].Name;
+									menu = ObjectLists.Buffets[index].Menu;
 									break;
 								}
 							case ('G'):
 								{
-									placeName = ObjectLists.Groceries.ElementAt(index).Name;
-									menu = ObjectLists.Groceries.ElementAt(index).Menu;
+									placeName = ObjectLists.Groceries[index].Name;
+									menu = ObjectLists.Groceries[index].Menu;
 									break;
 								}
 							default:
@@ -594,7 +590,7 @@ class Program
 									   {
 										   ("Назад", "/places")
 									   });
-									throw new Exception($"Invalid command agrs: {msg.Text}");
+									throw new ArgumentException("Invalid command args", nameof(args));
 								}
 						}
 
@@ -660,7 +656,7 @@ class Program
 							{
 								("Назад", "/places")
 							});
-							throw new Exception($"No command args: {msg.Text}");
+							throw new ArgumentException("No command args", nameof(args));
 						}
 
 						int index = 0, page = 0, placeSelectorPage = 0;
@@ -673,7 +669,7 @@ class Program
 								{
 									("Назад", "/places")
 								});
-								throw new Exception($"Invalid command agrs: {msg.Text}");
+								throw new ArgumentException("Invalid command args", nameof(args));
 							}
 						}
 						else if (!char.IsLetter(args[2]) || !int.TryParse(args[3..args.IndexOf('_')], out index)
@@ -683,7 +679,7 @@ class Program
 							{
 								("Назад", "/places")
 							});
-							throw new Exception($"Invalid command agrs: {msg.Text}");
+							throw new ArgumentException("Invalid command args", nameof(args));
 						}
 
 						if (page < 0)
@@ -696,20 +692,20 @@ class Program
 						{
 							case ('C'):
 								{
-									placeName = ObjectLists.Canteens.ElementAt(index).Name;
-									reviews = ObjectLists.Canteens.ElementAt(index).Reviews;
+									placeName = ObjectLists.Canteens[index].Name;
+									reviews = ObjectLists.Canteens[index].Reviews;
 									break;
 								}
 							case ('B'):
 								{
-									placeName = ObjectLists.Buffets.ElementAt(index).Name;
-									reviews = ObjectLists.Buffets.ElementAt(index).Reviews;
+									placeName = ObjectLists.Buffets[index].Name;
+									reviews = ObjectLists.Buffets[index].Reviews;
 									break;
 								}
 							case ('G'):
 								{
-									placeName = ObjectLists.Groceries.ElementAt(index).Name;
-									reviews = ObjectLists.Groceries.ElementAt(index).Reviews;
+									placeName = ObjectLists.Groceries[index].Name;
+									reviews = ObjectLists.Groceries[index].Reviews;
 									break;
 								}
 							default:
@@ -718,7 +714,7 @@ class Program
 									{
 										("Назад", "/places")
 									});
-									throw new Exception($"Invalid command agrs: {msg.Text}");
+									throw new ArgumentException("Invalid command args", nameof(args));
 								}
 						}
 
@@ -781,7 +777,7 @@ class Program
 							{
 								("Назад", "/places")
 							});
-							throw new Exception($"No command args: {msg.Text}");
+							throw new ArgumentException("No command args", nameof(args));
 						}
 
 						int index = 0, placeSelectorPage = 0;
@@ -793,7 +789,7 @@ class Program
 								{
 									("Назад", "/places")
 								});
-								throw new Exception($"Invalid command agrs: {msg.Text}");
+								throw new ArgumentException("Invalid command args", nameof(args));
 							}
 						}
 						else if (!char.IsLetter(args[1]) || !int.TryParse(args[2..], out index))
@@ -803,7 +799,7 @@ class Program
 							{
 								("Назад", "/places")
 							});
-							throw new Exception($"Invalid command agrs: {msg.Text}");
+							throw new ArgumentException("Invalid command args", nameof(args));
 						}
 
 						BasePlace place;
@@ -811,17 +807,17 @@ class Program
 						{
 							case ('C'):
 								{
-									place = ObjectLists.Canteens.ElementAt(index);
+									place = ObjectLists.Canteens[index];
 									break;
 								}
 							case ('B'):
 								{
-									place = ObjectLists.Buffets.ElementAt(index);
+									place = ObjectLists.Buffets[index];
 									break;
 								}
 							case ('G'):
 								{
-									place = ObjectLists.Groceries.ElementAt(index);
+									place = ObjectLists.Groceries[index];
 									break;
 								}
 							default:
@@ -830,7 +826,7 @@ class Program
 									{
 										("Назад", "/places")
 									});
-									throw new Exception($"Invalid command agrs: {msg.Text}");
+									throw new ArgumentException("Invalid command args", nameof(args));
 								}
 						}
 
@@ -840,8 +836,8 @@ class Program
 								await EditOrSendMessage(msg, $"""
 									Вы уже оставили отзыв на {place.Name}
 
-									• Оценка: {place.Reviews.Where(x => x.UserID == foundUser!.UserID).First().Rating}
-									• Комментарий: {place.Reviews.Where(x => x.UserID == foundUser!.UserID).First().Comment ?? "Отсутствует"}
+									• Оценка: {place.Reviews.First(x => x.UserID == foundUser!.UserID).Rating}
+									• Комментарий: {place.Reviews.First(x => x.UserID == foundUser!.UserID).Comment ?? "Отсутствует"}
 									""", new InlineKeyboardButton[][]
 									{
 										[("Изменить", $"/changeReview -{args}"), ("Удалить", $"#deleteReview {args}")],
@@ -851,8 +847,8 @@ class Program
 								await EditOrSendMessage(msg, $"""
 									Вы уже оставили отзыв на {place.Name}
 
-									• Оценка: {AdminControl.ReviewCollector.Where(x => x.place == place && x.review.UserID == foundUser!.UserID).First().review.Rating}
-									• Комментарий: {AdminControl.ReviewCollector.Where(x => x.place == place && x.review.UserID == foundUser!.UserID).First().review.Comment}
+									• Оценка: {AdminControl.ReviewCollector.First(x => x.place == place && x.review.UserID == foundUser!.UserID).review.Rating}
+									• Комментарий: {AdminControl.ReviewCollector.First(x => x.place == place && x.review.UserID == foundUser!.UserID).review.Comment}
 									""", new InlineKeyboardButton[][]
 									{
 										[("Изменить", $"/changeReview -{args}"), ("Удалить", $"#deleteReview {args}")],
@@ -889,7 +885,7 @@ class Program
 							{
 								("Назад", "/places")
 							});
-							throw new Exception($"No command args: {msg.Text}");
+							throw new ArgumentException("No command args", nameof(args));
 						}
 
 						int index = 0, placeSelectorPage = 0;
@@ -901,7 +897,7 @@ class Program
 								{
 									("Назад", "/places")
 								});
-								throw new Exception($"Invalid command agrs: {msg.Text}");
+								throw new ArgumentException("Invalid command args", nameof(args));
 							}
 						}
 						else if (!char.IsLetter(args[2]) || !int.TryParse(args[3..], out index))
@@ -910,7 +906,7 @@ class Program
 							{
 								("Назад", "/places")
 							});
-							throw new Exception($"Invalid command agrs: {msg.Text}");
+							throw new ArgumentException("Invalid command args", nameof(args));
 						}
 
 						BasePlace place;
@@ -918,17 +914,17 @@ class Program
 						{
 							case ('C'):
 								{
-									place = ObjectLists.Canteens.ElementAt(index);
+									place = ObjectLists.Canteens[index];
 									break;
 								}
 							case ('B'):
 								{
-									place = ObjectLists.Buffets.ElementAt(index);
+									place = ObjectLists.Buffets[index];
 									break;
 								}
 							case ('G'):
 								{
-									place = ObjectLists.Groceries.ElementAt(index);
+									place = ObjectLists.Groceries[index];
 									break;
 								}
 							default:
@@ -937,11 +933,11 @@ class Program
 									   {
 										   ("Назад", "/places")
 									   });
-									throw new Exception($"Invalid command agrs: {msg.Text}");
+									throw new ArgumentException("Invalid command args", nameof(args));
 								}
 						}
 
-						if (!place.Reviews.Where(x => x.UserID == foundUser!.UserID).Any() && !AdminControl.ReviewCollector.Any(x => x.place == place && x.review.UserID == foundUser!.UserID))
+						if (!place.Reviews.Any(x => x.UserID == foundUser!.UserID) && !AdminControl.ReviewCollector.Any(x => x.place == place && x.review.UserID == foundUser!.UserID))
 						{
 							await EditOrSendMessage(msg, $"""
 							Вы не можете изменить отзыв на {place.Name}
@@ -1057,7 +1053,7 @@ class Program
 							{
 								("Назад", "/admin")
 							});
-							throw new Exception($"Invalid command agrs: {msg.Text}");
+							throw new ArgumentException("Invalid command args", nameof(args));
 						}
 
 						switch (args[..3])
@@ -1158,7 +1154,7 @@ class Program
 												{
 													("Назад", "/admin chk")
 												});
-												throw new Exception($"Invalid command agrs: {msg.Text}");
+												throw new ArgumentException("Invalid command args", nameof(args));
 											}
 									}
 									break;
@@ -1171,7 +1167,7 @@ class Program
 										{
 											("Назад", "/admin")
 										});
-										throw new Exception($"No command args: {msg.Text}");
+										throw new ArgumentException("No command args", nameof(args));
 									}
 
 									int index = 0, page = 0, placeSelectorPage = 0;
@@ -1184,7 +1180,7 @@ class Program
 											{
 												("Назад", "/admin")
 											});
-											throw new Exception($"Invalid command agrs: {msg.Text}");
+											throw new ArgumentException("Invalid command args", nameof(args));
 										}
 									}
 									else if (!char.IsLetter(args[5]) || !int.TryParse(args[6..args.IndexOf('_')], out index)
@@ -1194,7 +1190,7 @@ class Program
 										{
 											("Назад", "/places")
 										});
-										throw new Exception($"Invalid command agrs: {msg.Text}");
+										throw new ArgumentException("Invalid command args", nameof(args));
 									}
 
 									if (page < 0)
@@ -1207,20 +1203,20 @@ class Program
 									{
 										case ('C'):
 											{
-												placeName = ObjectLists.Canteens.ElementAt(index).Name;
-												reviews = ObjectLists.Canteens.ElementAt(index).Reviews;
+												placeName = ObjectLists.Canteens[index].Name;
+												reviews = ObjectLists.Canteens[index].Reviews;
 												break;
 											}
 										case ('B'):
 											{
-												placeName = ObjectLists.Buffets.ElementAt(index).Name;
-												reviews = ObjectLists.Buffets.ElementAt(index).Reviews;
+												placeName = ObjectLists.Buffets[index].Name;
+												reviews = ObjectLists.Buffets[index].Reviews;
 												break;
 											}
 										case ('G'):
 											{
-												placeName = ObjectLists.Groceries.ElementAt(index).Name;
-												reviews = ObjectLists.Groceries.ElementAt(index).Reviews;
+												placeName = ObjectLists.Groceries[index].Name;
+												reviews = ObjectLists.Groceries[index].Reviews;
 												break;
 											}
 										default:
@@ -1229,7 +1225,7 @@ class Program
 												{
 													("Назад", "/admin")
 												});
-												throw new Exception($"Invalid command agrs: {msg.Text}");
+												throw new ArgumentException("Invalid command args", nameof(args));
 											}
 									}
 
@@ -1268,7 +1264,7 @@ class Program
 									await EditOrSendMessage(msg, $"""
 									Название: {placeName}
 									Всего отзывов: {reviewCounter}
-									Всего отзывов с комментариями: {reviews.Where(x => x.Comment != null).Count()}
+									Всего отзывов с комментариями: {reviews.Count(x => x.Comment != null)}
 									{(sortType != null ? $"Режим сортировки: {sortType}\n" : "")}
 									{(reviews.Count > nowCounter ? $"№{nowCounter} | От @{(ObjectLists.Persons.TryGetValue(reviews[nowCounter].UserID, out Person? user1) ? user1.Username : "???")} | {reviews[nowCounter].Date} | {reviews[nowCounter].Rating}⭐ | {reviews[nowCounter].Comment ?? ""}" : "")}
 									{(reviews.Count > ++nowCounter ? $"№{nowCounter} | От @{(ObjectLists.Persons.TryGetValue(reviews[nowCounter].UserID, out Person? user2) ? user2.Username : "???")} | {reviews[nowCounter].Date} | {reviews[nowCounter].Rating}⭐ | {reviews[nowCounter].Comment ?? ""}" : "")}
@@ -1297,7 +1293,7 @@ class Program
 										{
 											("Назад", "/admin")
 										});
-										throw new Exception($"No command args: {msg.Text}");
+										throw new ArgumentException("No command args", nameof(args));
 									}
 
 									if (!char.IsLetter(args[5]) || !int.TryParse(args[6..args.IndexOf('_')], out int index) || !int.TryParse(args[(args.IndexOf('_') + 1)..], out int reviewIndex))
@@ -1306,7 +1302,7 @@ class Program
 										{
 											("Назад", "/places")
 										});
-										throw new Exception($"Invalid command agrs: {msg.Text}");
+										throw new ArgumentException("Invalid command args", nameof(args));
 									}
 
 									BasePlace basePlace;
@@ -1314,17 +1310,17 @@ class Program
 									{
 										case ('C'):
 											{
-												basePlace = ObjectLists.Canteens.ElementAt(index);
+												basePlace = ObjectLists.Canteens[index];
 												break;
 											}
 										case ('B'):
 											{
-												basePlace = ObjectLists.Buffets.ElementAt(index);
+												basePlace = ObjectLists.Buffets[index];
 												break;
 											}
 										case ('G'):
 											{
-												basePlace = ObjectLists.Groceries.ElementAt(index);
+												basePlace = ObjectLists.Groceries[index];
 												break;
 											}
 										default:
@@ -1333,7 +1329,7 @@ class Program
 												{
 													("Назад", "/admin")
 												});
-												throw new Exception($"Invalid command agrs: {msg.Text}");
+												throw new ArgumentException("Invalid command args", nameof(args));
 											}
 									}
 
@@ -1383,7 +1379,7 @@ class Program
 										{
 											("Назад", "/admin")
 										});
-										throw new Exception($"No command args: {msg.Text}");
+										throw new ArgumentException("No command args", nameof(args));
 									}
 
 									if (args.Length == 3)
@@ -1394,9 +1390,9 @@ class Program
 										Количество заблокированных пользователей: {SecurityManager.BlockedUsers.Count}
 
 										Пользователей с замедлением:
-										- Лёгким: {SecurityManager.SuspiciousUsers.Where(x => x.Value.suspiciousClass == SuspiciousClass.Light).Count()}
-										- Средним: {SecurityManager.SuspiciousUsers.Where(x => x.Value.suspiciousClass == SuspiciousClass.Medium).Count()}
-										- Серьёзным: {SecurityManager.SuspiciousUsers.Where(x => x.Value.suspiciousClass == SuspiciousClass.High).Count()}
+										- Лёгким: {SecurityManager.SuspiciousUsers.Count(x => x.Value.suspiciousClass == SuspiciousClass.Light)}
+										- Средним: {SecurityManager.SuspiciousUsers.Count(x => x.Value.suspiciousClass == SuspiciousClass.Medium)}
+										- Серьёзным: {SecurityManager.SuspiciousUsers.Count(x => x.Value.suspiciousClass == SuspiciousClass.High)}
 										""", new InlineKeyboardButton[][]
 										{
 											[("Выдать замедление", "/admin banS--_0"), ("Выдать блокировку", "/admin banB--_0")],
@@ -1412,7 +1408,7 @@ class Program
 										{
 											("Назад", "/admin")
 										});
-										throw new Exception($"No command args: {msg.Text}");
+										throw new ArgumentException("No command args", nameof(args));
 									}
 
 									if (!int.TryParse(args[(args.IndexOf('_') + 1)..], out int page))
@@ -1421,7 +1417,7 @@ class Program
 										{
 											("Назад", "/admin ban")
 										});
-										throw new Exception($"Invalid command agrs: {msg.Text}");
+										throw new ArgumentException("Invalid command args", nameof(args));
 									}
 
 									if (page < 0)
@@ -1528,7 +1524,7 @@ class Program
 													{
 														("Назад", "/admin banS--_0")
 													});
-													throw new Exception($"Invalid command agrs: {msg.Text}");
+													throw new ArgumentException("Invalid command args", nameof(args));
 												}
 
 
@@ -1594,7 +1590,7 @@ class Program
 													{
 														("Назад", "/admin banB--_0")
 													});
-													throw new Exception($"Invalid command agrs: {msg.Text}");
+													throw new ArgumentException("Invalid command args", nameof(args));
 												}
 
 
@@ -1629,7 +1625,7 @@ class Program
 													{
 														("Назад", "/admin")
 													});
-												throw new Exception($"Invalid command agrs: {msg.Text}");
+												throw new ArgumentException("Invalid command args", nameof(args));
 											}
 									}
 									break;
@@ -1640,7 +1636,7 @@ class Program
 									{
 										("Назад", "/admin")
 									});
-									throw new Exception($"Invalid command agrs: {msg.Text}");
+									throw new ArgumentException("Invalid command args", nameof(args));
 								}
 						}
 						break;
@@ -1746,7 +1742,7 @@ class Program
 							{
 											("Назад", "/places")
 							});
-							throw new Exception($"No command args: {callbackQuery.Message.Text}");
+							throw new ArgumentException($"No command args in request {callbackQuery.Message.Text}");
 						}
 
 						if (splitStr[0] == "#admin" && foundUser.Role == RoleType.Administrator)
@@ -1830,7 +1826,7 @@ class Program
 											{
 											("Назад", "/places")
 											});
-											throw new Exception($"Invalid command agrs: {callbackQuery.Data}");
+											throw new ArgumentException($"Invalid command args: {splitStr[1]}");
 										}
 
 										BasePlace placeOfReview;
@@ -1838,17 +1834,17 @@ class Program
 										{
 											case ('C'):
 												{
-													placeOfReview = ObjectLists.Canteens.ElementAt(locationReview);
+													placeOfReview = ObjectLists.Canteens[locationReview];
 													break;
 												}
 											case ('B'):
 												{
-													placeOfReview = ObjectLists.Buffets.ElementAt(locationReview);
+													placeOfReview = ObjectLists.Buffets[locationReview];
 													break;
 												}
 											case ('G'):
 												{
-													placeOfReview = ObjectLists.Groceries.ElementAt(locationReview);
+													placeOfReview = ObjectLists.Groceries[locationReview];
 													break;
 												}
 											default:
@@ -1857,7 +1853,7 @@ class Program
 													{
 														("Назад", "/places")
 													});
-													throw new Exception($"Invalid command agrs: {callbackQuery.Message.Text}");
+													throw new ArgumentException($"Invalid command args: {splitStr[1]}");
 												}
 										}
 
@@ -1885,7 +1881,7 @@ class Program
 										{
 											("Назад", $"/info {splitStr[1]}")
 										});
-										throw new Exception($"Error while user {foundUser.UserID} trying to delete review on {placeOfReview.Name}");
+										throw new ArgumentException($"Error while user {foundUser.UserID} trying to delete review on {placeOfReview.Name}");
 									}
 								case ("susG"):
 									{
@@ -1902,7 +1898,7 @@ class Program
 											{
 												("Назад", $"/admin banS--_0")
 											});
-											throw new Exception($"Error while user {foundUser.UserID} trying to slow user");
+											throw new ArgumentException($"Error while user {foundUser.UserID} trying to slow user");
 										}
 
 										if (SecurityManager.UpdateSuspiciousUser(userID, selectedClass))
@@ -1929,7 +1925,7 @@ class Program
 										{
 											("Назад", $"/admin banS--_0")
 										});
-										throw new Exception($"Error while user {foundUser.UserID} trying to slow user {userID}");
+										throw new ArgumentException($"Error while user {foundUser.UserID} trying to slow user {userID}");
 									}
 								case ("susR"):
 									{
@@ -1939,7 +1935,7 @@ class Program
 											{
 												("Назад", $"/admin banSR_0")
 											});
-											throw new Exception($"Error while user {foundUser.UserID} trying remove slow from user");
+											throw new ArgumentException($"Error while user {foundUser.UserID} trying remove slow from user");
 										}
 
 										if (SecurityManager.SuspiciousUsers.TryRemove(userID, out _))
@@ -1966,7 +1962,7 @@ class Program
 										{
 											("Назад", $"/admin banSR_0")
 										});
-										throw new Exception($"Error while user {foundUser.UserID} trying remove slow from user {userID}");
+										throw new ArgumentException($"Error while user {foundUser.UserID} trying remove slow from user {userID}");
 									}
 								case ("banG"):
 									{
@@ -1983,7 +1979,7 @@ class Program
 											{
 												("Назад", $"/admin banB--_0")
 											});
-											throw new Exception($"Error while user {foundUser.UserID} trying to slow user");
+											throw new ArgumentException($"Error while user {foundUser.UserID} trying to slow user");
 										}
 
 										if (SecurityManager.BlockedUsers.TryAdd(userID, selectedReason))
@@ -2010,7 +2006,7 @@ class Program
 										{
 											("Назад", $"/admin banS--_0")
 										});
-										throw new Exception($"Error while user {foundUser.UserID} trying to slow user {userID}");
+										throw new ArgumentException($"Error while user {foundUser.UserID} trying to slow user {userID}");
 									}
 								case ("banR"):
 									{
@@ -2020,7 +2016,7 @@ class Program
 											{
 												("Назад", $"/admin banBR_0")
 											});
-											throw new Exception($"Error while user {foundUser.UserID} trying remove ban from user");
+											throw new ArgumentException($"Error while user {foundUser.UserID} trying remove ban from user");
 										}
 
 										if (SecurityManager.BlockedUsers.TryRemove(userID, out _))
@@ -2047,11 +2043,11 @@ class Program
 										{
 											("Назад", $"/admin banBR_0")
 										});
-										throw new Exception($"Error while user {foundUser.UserID} trying remove ban from user {userID}");
+										throw new ArgumentException($"Error while user {foundUser.UserID} trying remove ban from user {userID}");
 									}
 								default:
 									{
-										throw new Exception($"Invalid command agrs: {callbackQuery.Message.Text}");
+										throw new ArgumentException($"Invalid command args: {splitStr[1]}");
 									}
 							}
 							break;
@@ -2063,7 +2059,7 @@ class Program
 							{
 											("Назад", "/places")
 							});
-							throw new Exception($"Invalid command agrs: {callbackQuery.Message.Text}");
+							throw new ArgumentException($"Invalid command args: {splitStr[1]}");
 						}
 
 						BasePlace place;
@@ -2071,17 +2067,17 @@ class Program
 						{
 							case ('C'):
 								{
-									place = ObjectLists.Canteens.ElementAt(index);
+									place = ObjectLists.Canteens[index];
 									break;
 								}
 							case ('B'):
 								{
-									place = ObjectLists.Buffets.ElementAt(index);
+									place = ObjectLists.Buffets[index];
 									break;
 								}
 							case ('G'):
 								{
-									place = ObjectLists.Groceries.ElementAt(index);
+									place = ObjectLists.Groceries[index];
 									break;
 								}
 							default:
@@ -2090,7 +2086,7 @@ class Program
 									   {
 										   ("Назад", "/places")
 									   });
-									throw new Exception($"Invalid command agrs: {callbackQuery.Message.Text}");
+									throw new ArgumentException($"Invalid command args: {splitStr[1]}");
 								}
 						}
 
@@ -2124,14 +2120,14 @@ class Program
 										{
 											("Назад", $"/info {usersState[foundUser.UserID].ReferenceToPlace}")
 										});
-										throw new Exception($"Ошибка при попытке оставить отзыв: {usersState[foundUser.UserID].ReferenceToPlace} - {usersState[foundUser.UserID].Rating} | {usersState[foundUser.UserID].Comment ?? "Комментарий отсутствует"}");
+										throw new ArgumentException($"Error when trying to leave a review: {usersState[foundUser.UserID].ReferenceToPlace} - {usersState[foundUser.UserID].Rating} | {usersState[foundUser.UserID].Comment ?? "No comment"}");
 									}
 
 									break;
 								}
 							case ("deleteReview"):
 								{
-									if (!place.Reviews.Where(x => x.UserID == foundUser.UserID).Any() && !AdminControl.ReviewCollector.Any(x => x.place == place && x.review.UserID == foundUser.UserID))
+									if (!place.Reviews.Any(x => x.UserID == foundUser.UserID) && !AdminControl.ReviewCollector.Any(x => x.place == place && x.review.UserID == foundUser.UserID))
 									{
 										await EditOrSendMessage(callbackQuery.Message, $"""
 										Вы не можете удалить отзыв на {place.Name}
@@ -2189,7 +2185,7 @@ class Program
 										{
 											("Назад", $"/info {splitStr[1]}")
 										});
-									throw new Exception($"Error while user {foundUser.UserID} trying to delete review on {place.Name}");
+									throw new ArgumentException($"Error while user {foundUser.UserID} trying to delete review on {place.Name}");
 								}
 							case ("changeReview"):
 								{
