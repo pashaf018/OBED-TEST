@@ -91,7 +91,7 @@ static class Program
 
 		static string HtmlEscape(string? s) => (s ?? "-").Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;");
 
-		async Task EditOrSendMessage(Message msg, string text, InlineKeyboardMarkup? markup = null, ParseMode parser = ParseMode.None, bool isForceReply = false)
+		async Task EditOrSendMessage(Message msg, string text, InlineKeyboardMarkup? markup = null, ParseMode parser = ParseMode.Html, bool isForceReply = false)
 		{
 			ArgumentNullException.ThrowIfNull(msg.From);
 
@@ -133,7 +133,7 @@ static class Program
 			{
 				if (SecurityManager.BlockedUsers.TryGetValue(foundUser.UserID, out string? reason))
 				{
-					await bot.SendMessage(msg.Chat, $"Вы были заблокированы за: {reason ?? "Траблмейкинг"}.");
+					await bot.SendMessage(msg.Chat, $"🚫 Вы были заблокированы за: {reason ?? "Траблмейкинг"}.");
 					return;
 				}
 
@@ -164,7 +164,9 @@ static class Program
 
 						if (foundUser == null)
 						{
-							await EditOrSendMessage(msg, "Вы не прошли регистрацию путём ввода /start, большая часть функций бота недоступна",
+							await EditOrSendMessage(msg, """
+								💀 Упс, регистрация не была пройдена
+								""",
 								new InlineKeyboardButton[] { ("Зарегистрироваться", "/start") });
 							break;
 						}
@@ -177,11 +179,14 @@ static class Program
 										{
 											usersState[foundUser.UserID].Rating = rating;
 											usersState[foundUser.UserID].Action = UserAction.CommentRequest;
-											await EditOrSendMessage(msg, $"Введите текст отзыва или откажитесь от сообщения отправив -", null, ParseMode.None, true);
+											await EditOrSendMessage(msg, $"🪶 Введи текст отзыва или откажись от сообщения, отправив -", null, ParseMode.None, true);
 											break;
 										}
 
-										await EditOrSendMessage(msg, $"Ошибка при обработке! Убедитесь, что ваше сообщение содержит только цифры, также они должны входить в промежуток от 1 до 10 включительно", null, ParseMode.None, true);
+										await EditOrSendMessage(msg, $"""
+											💀 Упс, ошибка при обработке! 
+											❕ Убедись, что твоё сообщение содержит только цифры, а также они должны входить в промежуток от 1 до 10 включительно
+											""", null, ParseMode.Html, true);
 										break;
 									}
 								case (UserAction.RatingChange):
@@ -195,23 +200,30 @@ static class Program
 											break;
 										}
 
-										await EditOrSendMessage(msg, $"Ошибка при обработке! Убедитесь, что ваше сообщение содержит только цифры, также они должны входить в промежуток от 1 до 10 включительно", null, ParseMode.None, true);
-										break;
+										await EditOrSendMessage(msg, $"""
+											💀 Упс, ошибка при обработке! 
+											❕ Убедись, что твоё сообщение содержит только цифры, а также они должны входить в промежуток от 1 до 10 включительно
+											""", null, ParseMode.Html, true);
+									break;
 									}
 								case (UserAction.CommentRequest):
 									{
 										if (string.IsNullOrWhiteSpace(msg.Text))
 										{
-											await EditOrSendMessage(msg, $"Ошибка при обработке! Убедитесь, что ваше сообщение содержит текст или откажитесь от сообщения отправив -", null, ParseMode.None, true);
-											break;
+											await EditOrSendMessage(msg, $"""
+												💀 Упс, ошибка при обработке! 
+												❕ Убедись, что твоё сообщение не содержит файлов, стикеров и т.д. или же откажись от отправки введя -
+												""", null, ParseMode.Html, true);
+										break;
 										}
 
 										if (msg.Text.Length > 720)
 										{
 											await EditOrSendMessage(msg, $"""
-											Ошибка при обработке! Комментарий не может быть больше 720 символов. Текущая длина сообщения: {msg.Text.Length}.
-											Убедитесь, что ваше новое сообщение содержит текст или откажитесь от сообщения отправив -
-											""", null, ParseMode.Html, true);
+												💀 Упс, ошибка при обработке!
+												😭 Комментарий не может быть больше 720 символов. Текущая длина сообщения: {msg.Text.Length}.
+												❕ Убедись, что твоё сообщение не содержит файлов, стикеров и т.д. или же откажись от отправки введя -
+												""", null, ParseMode.Html, true);
 											break;
 										}
 										usersState[foundUser.UserID].Comment = HtmlEscape(msg.Text).Trim();
@@ -220,24 +232,27 @@ static class Program
 
 										usersState[foundUser.UserID].Action = UserAction.NoActiveRequest;
 										await EditOrSendMessage(msg, $"""
-									Ваш отзыв:
+											❕Твой отзыв:
 									
-										• Оценка: {usersState[foundUser.UserID].Rating}
-										• Комментарий: {usersState[foundUser.UserID].Comment ?? "Отсутствует"}
+											💠 Оценка: {usersState[foundUser.UserID].Rating}
+											💠	Комментарий: {usersState[foundUser.UserID].Comment ?? "Отсутствует"}
 									
-									Всё верно?
-									""", new InlineKeyboardButton[][]
-										{
-										[("Да", $"#sendReview {usersState[foundUser.UserID].ReferenceToPlace}"), ("Нет", $"callback_resetAction")],
-										}, ParseMode.Html);
+											❓ Всё так?
+											""", new InlineKeyboardButton[][]
+											{
+												[("Да", $"#sendReview {usersState[foundUser.UserID].ReferenceToPlace}"), ("Нет", $"callback_resetAction")] 
+											});
 										break;
 									}
 								case (UserAction.CommentChange):
 									{
 										if (string.IsNullOrWhiteSpace(msg.Text))
 										{
-											await EditOrSendMessage(msg, $"Ошибка при обработке! Убедитесь, что ваше сообщение содержит текст или откажитесь от сообщения отправив -", null, ParseMode.None, true);
-											break;
+											await EditOrSendMessage(msg, $"""
+												💀 Упс, ошибка при обработке! 
+												❕ Убедись, что твоё сообщение не содержит файлов, стикеров и т.д. или же откажись от отправки введя -
+												""", null, ParseMode.Html, true);
+										break;
 										}
 
 										usersState[foundUser.UserID].Comment = HtmlEscape(msg.Text).Trim();
@@ -250,8 +265,11 @@ static class Program
 									{
 										if (string.IsNullOrWhiteSpace(msg.Text))
 										{
-											await EditOrSendMessage(msg, $"Ошибка при обработке! Убедитесь, что ваше сообщение содержит текст или удалите сообщение отправив -", null, ParseMode.None, true);
-											break;
+										await EditOrSendMessage(msg, $"""
+											💀 Упс, ошибка при обработке! 
+											❕ Убедись, что твоё сообщение не содержит файлов, стикеров и т.д. или же откажись от отправки введя -
+											""", null, ParseMode.Html, true);
+										break;
 										}
 
 										usersState[foundUser.UserID].Comment = HtmlEscape(msg.Text).Trim();
@@ -274,8 +292,7 @@ static class Program
 				await EditOrSendMessage(msg, """
 					💀 Упс, регистрация не была пройдена
 					""",
-					new InlineKeyboardButton[] { ("Зарегистрироваться", "/start") },
-					ParseMode.Html);
+					new InlineKeyboardButton[] { ("Зарегистрироваться", "/start") });
 				return;
 			}
 
@@ -310,7 +327,7 @@ static class Program
 								[("Профиль", "/person")],
 								[("Помощь", "/help"), ("Обратная связь", "/report")],
 								[(foundUser!.Role == RoleType.Administrator ? "Админ панель" : "", "/admin")]
-							}, ParseMode.Html);
+							});
 						break;
 					}
 				case ("/person"):
@@ -321,7 +338,7 @@ static class Program
 							""", new InlineKeyboardButton[]
 							{
 								("Назад","/start")
-							}, ParseMode.Html);
+							});
 						break;
 					}
 				case ("/help"):
@@ -347,7 +364,7 @@ static class Program
 							""", new InlineKeyboardButton[][]
 							{
 								[("Назад","/start")]
-							}, ParseMode.Html);
+							});
 						break;
 					}
 				case ("/report"):
@@ -361,7 +378,7 @@ static class Program
 							""", new InlineKeyboardButton[][]
 							{
 								[("Назад","/start")]
-							}, ParseMode.Html);
+							});
 						break;
 					}
 				case ("/places"):
@@ -374,7 +391,7 @@ static class Program
 								[("Буфеты", "/placeSelector -B")],
 								[("Внешние магазины", "/placeSelector -G")],
 								[("Назад", "/start")]
-							}, ParseMode.Html);
+							});
 						break;
 					}
 				case ("/placeSelector"):
@@ -467,7 +484,7 @@ static class Program
 								[($"{((placesCounter > ++nowCounter) ? sortedPlaces[nowCounter].Name : "")}", $"{((indexPairs.Count - 1) >= nowCounter ? $"/info {args[..2]}{indexPairs[nowCounter]}_{page}" : "/places")}")],
 								[($"{((placesCounter > ++nowCounter) ? sortedPlaces[nowCounter].Name : "")}", $"{((indexPairs.Count - 1) >= nowCounter ? $"/info {args[..2]}{indexPairs[nowCounter]}_{page}" : "/places")}")],
 								[($"{((page != 0) ? "◀️" : "")}", $"/placeSelector {args[..2]}{page - 1}"), ("Назад","/places"), ($"{(placesCounter > nowCounter ? "▶️" : "")}", $"/placeSelector {args[..2]}{page + 1}")]
-							}, ParseMode.Html);
+							});
 						break;
 					}
 				case ("/buildingNumberSelector"):
@@ -489,7 +506,7 @@ static class Program
 								[("4", $"/placeSelector 4{args[0]}"), ("5", $"/placeSelector 5{args[0]}"), ("6", $"/placeSelector 6{args[0]}")],
 								[("ИАТУ", $"/placeSelector 0{args[0]}"), ("На территории кампуса", $"/placeSelector 7{args[0]}")],
 								[("Назад","/places")]
-							}, ParseMode.Html);
+							});
 						break;
 					}
 				case ("/info"):
@@ -564,7 +581,7 @@ static class Program
 								[("Оставить отзыв", $"/sendReview {args}"), ("Отзывы", $"/reviews N{args}")],
 								[((foundUser!.Role == RoleType.Administrator && place.Reviews.Count != 0) ? "Панель удаления" : "", $"/admin delN{args}")],
 								[("Назад", $"/placeSelector {args[..2]}{placeSelectorPage}")]
-							}, ParseMode.Html);
+							});
 						break;
 					}
 				case ("/menu"):
@@ -691,7 +708,7 @@ static class Program
 								(productType == ProductType.Drink ? "" : "Напитки", $"/menu D{args[1..3]}{index}_{placeSelectorPage}"), (productType == ProductType.Appetizer ? "" : "Закуски", $"/menu A{args[1..3]}{index}_{placeSelectorPage}")],
 
 								[((page != 0) ? "◀️" : "", $"/menu {args[..3]}{index}|{page - 1}_{placeSelectorPage}"), ("Назад", $"/info {args[1..3]}{index}_{placeSelectorPage}"), (menu.Count > ++nowCounter ? "▶️" : "", $"/menu {args[..3]}{index}|{page + 1}_{placeSelectorPage}")]
-							}, ParseMode.Html);
+							});
 						break;
 					}
 				case ("/reviews"):
@@ -815,7 +832,7 @@ static class Program
 								(sortType == ReviewSort.NewDate ? "" : "Новые", $"/reviews N{args[1..3]}{index}_{placeSelectorPage}"), (sortType == ReviewSort.OldDate ? "" : "Старые", $"/reviews O{args[1..3]}{index}_{placeSelectorPage}")],
 
 								[((page != 0) ? "◀️" : "", $"/reviews {args[..3]}{index}|{page - 1}_{placeSelectorPage}"), ("Назад", $"/info {args[1..3]}{index}_{placeSelectorPage}"), (reviews.Count > ++nowCounter ? "▶️" : "", $"/reviews {args[..3]}{index}|{page + 1}_{placeSelectorPage}")]
-							}, ParseMode.Html);
+							});
 						break;
 					}
 				case ("/sendReview"):
@@ -893,7 +910,7 @@ static class Program
 									{
 										[("Изменить", $"/changeReview -{args}"), ("Удалить", $"#deleteReview {args}")],
 										[("Назад", $"/info {args}")]
-									}, ParseMode.Html);
+									});
 							else
 								await EditOrSendMessage(msg, $"""
 									😅 Ты уже оставил отзыв на {place.Name}
@@ -906,7 +923,7 @@ static class Program
 									{
 										[("Изменить", $"/changeReview -{args}"), ("Удалить", $"#deleteReview {args}")],
 										[("Назад", $"/info {args}")]
-									}, ParseMode.Html);
+									});
 							break;
 						}
 
@@ -999,7 +1016,7 @@ static class Program
 								""", new InlineKeyboardButton[]
 								{
 									("Назад", $"/info {args[1..]}")
-								}, ParseMode.Html);
+								});
 							break;
 						}
 
@@ -1033,7 +1050,7 @@ static class Program
 										{
 											[("Оценку", $"/changeReview R{args[1..]}"), ("Комментарий", $"/changeReview C{args[1..]}")],
 											[("Назад", $"/info {args[1..]}")]
-										}, ParseMode.Html);
+										});
 									break;
 								}
 							case (UserAction.NoActiveChange):
@@ -1068,7 +1085,7 @@ static class Program
 										{
 											[("Да", $"#changeReview {usersState[foundUser!.UserID].ReferenceToPlace}"), ("Нет", $"/changeReview -{usersState[foundUser!.UserID].ReferenceToPlace}")],
 											[("Назад", $"/info {args[1..]}")]
-										}, ParseMode.Html);
+										});
 									break;
 								}
 						}
@@ -1096,7 +1113,7 @@ static class Program
 								[(AdminControl.ReviewCollector.Count > 0 ? "Начать проверку" : "", $"/admin chk")],
 								[("Меню блокировок", "/admin ban")],
 								[("Обновить админ-меню", "/admin ref"), ("Назад", $"/start")]
-							}, ParseMode.Html);
+							});
 							break;
 						}
 
@@ -1123,7 +1140,7 @@ static class Program
 											[(AdminControl.ReviewCollector.Count > 0 ? "Начать проверку" : "", $"/admin chk")],
 											[("Меню блокировок", "/admin ban")],
 											[("Обновить админ-меню", "/admin"), ("Назад", $"/start")]
-										}, ParseMode.Html);
+										});
 									break;
 								}
 							case ("chk"):
@@ -1147,7 +1164,7 @@ static class Program
 													[("Изменить вручную", $"/admin chkA")],
 													[("Принять авто-мод", $"#admin chkM"), ("Принять оригинал", $"#admin chkO")],
 													[("Назад", $"/admin")]
-												}, ParseMode.Html);
+												});
 										}
 										else
 											await EditOrSendMessage(msg, $"""	
@@ -1155,7 +1172,7 @@ static class Program
 												""", new InlineKeyboardButton[][]
 												{
 													[("Назад", $"/admin")]
-												}, ParseMode.Html);
+												});
 										break;
 									}
 
@@ -1188,7 +1205,7 @@ static class Program
 																{
 																	[("Да", $"#admin chkA"), ("Нет", "/admin chkA")],
 																	[("Назад", "/admin chk")]
-																}, ParseMode.Html);
+																});
 															break;
 														}
 													default:
@@ -1335,7 +1352,7 @@ static class Program
 											(sortType == ReviewSort.NewDate ? "" : "Новые", $"/admin delN{args[4..6]}{index}_{placeSelectorPage}"), (sortType == ReviewSort.OldDate ? "" : "Старые", $"/admin delO{args[4..6]}{index}_{placeSelectorPage}")],
 
 											[((page != 0) ? "◀️" : "", $"/admin {args[..6]}{index}|{page - 1}_{placeSelectorPage}"), ("Назад", $"/info {args[4..6]}{index}_{placeSelectorPage}"), (reviews.Count > ++nowCounter ? "▶️" : "", $"/admin {args[..6]}{index}|{page + 1}_{placeSelectorPage}")]
-										}, ParseMode.Html);
+										});
 									break;
 								}
 							case ("cnf"):
@@ -1421,7 +1438,7 @@ static class Program
 										{
 											[("Удалить", $"#admin delR{args[5..args.IndexOf('_')]}_{realReviewIndex}")],
 											[("Назад", $"/admin del{args[3..args.IndexOf('_')]}_0")]
-										}, ParseMode.Html);
+										});
 									break;
 								}
 							case ("ban"):
@@ -1451,7 +1468,7 @@ static class Program
 												[("Выдать замедление", "/admin banS--_0"), ("Выдать блокировку", "/admin banB--_0")],
 												[("Снять замедление", "/admin banSR_0"), ("Снять блокировку", "/admin banBR_0")],
 												[("Назад", "/admin")]
-											}, ParseMode.Html);
+											});
 										break;
 									}
 
@@ -1509,7 +1526,7 @@ static class Program
 														[(activePersons.Count > (nowCounter - 3) ? $"@{(ObjectLists.Persons.TryGetValue(activePersons[nowCounter - 3].userID, out Person? _user3) ? _user3.Username : "")}" : "", activePersons.Count > (nowCounter - 3) ? $"#admin susR{activePersons[nowCounter - 3].userID}" : "-"), (activePersons.Count > (nowCounter - 2) ? $"@{(ObjectLists.Persons.TryGetValue(activePersons[nowCounter - 2].userID, out Person? _user2) ? _user2.Username : "")}" : "", activePersons.Count > (nowCounter - 2) ? $"#admin susR{activePersons[nowCounter - 2].userID}" : "-")],
 														[(activePersons.Count > (nowCounter - 1) ? $"@{(ObjectLists.Persons.TryGetValue(activePersons[nowCounter - 1].userID, out Person? _user1) ? _user1.Username : "")}" : "", activePersons.Count > (nowCounter - 1) ? $"#admin susR{activePersons[nowCounter - 1].userID}" : "-"), (activePersons.Count > nowCounter ? $"@{(ObjectLists.Persons.TryGetValue(activePersons[nowCounter].userID, out Person? _user0) ? _user0.Username : "")}" : "", activePersons.Count > nowCounter ? $"#admin susR{activePersons[nowCounter].userID}" : "-")],
 														[("Назад", "/admin ban")]
-													}, ParseMode.Html);
+													});
 												break;
 											}
 										case 'B' when args[4] == 'R':
@@ -1541,7 +1558,7 @@ static class Program
 														[(activePersons.Count > (nowCounter - 3) ? $"@{(ObjectLists.Persons.TryGetValue(activePersons[nowCounter - 3].userID, out Person? _user3) ? _user3.Username : "")}" : "", activePersons.Count > (nowCounter - 3) ? $"#admin banR{activePersons[nowCounter - 3].userID}" : "-"), (activePersons.Count > (nowCounter - 2) ? $"@{(ObjectLists.Persons.TryGetValue(activePersons[nowCounter - 2].userID, out Person? _user2) ? _user2.Username : "")}" : "", activePersons.Count > (nowCounter - 2) ? $"#admin banR{activePersons[nowCounter - 2].userID}" : "-")],
 														[(activePersons.Count > (nowCounter - 1) ? $"@{(ObjectLists.Persons.TryGetValue(activePersons[nowCounter - 1].userID, out Person? _user1) ? _user1.Username : "")}" : "", activePersons.Count > (nowCounter - 1) ? $"#admin banR{activePersons[nowCounter - 1].userID}" : "-"), (activePersons.Count > nowCounter ? $"@{(ObjectLists.Persons.TryGetValue(activePersons[nowCounter].userID, out Person? _user0) ? _user0.Username : "")}" : "", activePersons.Count > nowCounter ? $"#admin banR{activePersons[nowCounter].userID}" : "-")],
 														[("Назад", "/admin ban")]
-													}, ParseMode.Html);
+													});
 												break;
 											}
 										case 'S':
@@ -1560,7 +1577,7 @@ static class Program
 														{
 															[("Лёгкое", "/admin banS-L_0"), ("Среднее", "/admin banS-M_0"), ("Серьёзное", "/admin banS-H_0")],
 															[("Назад", "/admin ban")]
-														}, ParseMode.Html);
+														});
 													break;
 												}
 
@@ -1603,7 +1620,7 @@ static class Program
 														[(activePersons.Count > (nowCounter - 3) ? $"@{activePersons[nowCounter - 3].Username}" : "", activePersons.Count > (nowCounter - 3) ? $"#admin susG{args[5]}{activePersons[nowCounter - 3].UserID}" : "-"), (activePersons.Count > (nowCounter - 2) ? $"@{activePersons[nowCounter - 2].Username}" : "", activePersons.Count > (nowCounter - 2) ? $"#admin susG{args[5]}{activePersons[nowCounter - 2].UserID}" : "-")],
 														[(activePersons.Count > (nowCounter - 1) ? $"@{activePersons[nowCounter - 1].Username}" : "", activePersons.Count > (nowCounter - 1) ? $"#admin susG{args[5]}{activePersons[nowCounter - 1].UserID}" : "-"), (activePersons.Count > nowCounter ? $"@{activePersons[nowCounter].Username}" : "", activePersons.Count > nowCounter ? $"#admin susG{args[5]}{activePersons[nowCounter].UserID}" : "-")],
 														[("Назад", "/admin banS--_0")]
-													}, ParseMode.Html);
+													});
 												break;
 											}
 										case 'B':
@@ -1626,7 +1643,7 @@ static class Program
 															[("2 | Оскорбительный отзыв", "/admin banB-M_0")], 
 															[("3 | Траблмейкинг", "/admin banB-H_0")],
 															[("Назад", "/admin ban")]
-														}, ParseMode.Html);
+														});
 													break;
 												}
 
@@ -1669,7 +1686,7 @@ static class Program
 														[(activePersons.Count > (nowCounter - 3) ? $"@{activePersons[nowCounter - 3].Username}" : "", activePersons.Count > (nowCounter - 3) ? $"#admin banG{args[5]}{activePersons[nowCounter - 3].UserID}" : "-"), (activePersons.Count > (nowCounter - 2) ? $"@{activePersons[nowCounter - 2].Username}" : "", activePersons.Count > (nowCounter - 2) ? $"#admin banG{args[5]}{activePersons[nowCounter - 2].UserID}" : "-")],
 														[(activePersons.Count > (nowCounter - 1) ? $"@{activePersons[nowCounter - 1].Username}" : "", activePersons.Count > (nowCounter - 1) ? $"#admin banG{args[5]}{activePersons[nowCounter - 1].UserID}" : "-"), (activePersons.Count > nowCounter ? $"@{activePersons[nowCounter].Username}" : "", activePersons.Count > nowCounter ? $"#admin banG{args[5]}{activePersons[nowCounter].UserID}" : "-")],
 														[("Назад", "/admin banB--_0")]
-													}, ParseMode.Html);
+													});
 												break;
 											}
 										default:
@@ -1733,7 +1750,7 @@ static class Program
             {
 				if (SecurityManager.BlockedUsers.TryGetValue(foundUser.UserID, out string? reason))
 				{
-					await bot.SendMessage(callbackQuery.Message.Chat, $"Вы были заблокированы за: {reason ?? "Траблмейкинг"}.");
+					await bot.SendMessage(callbackQuery.Message.Chat, $"🚫 Вы были заблокированы за: {reason ?? "Траблмейкинг"}.");
 					return;
 				}
 
@@ -1765,10 +1782,10 @@ static class Program
 						{
 							Console.WriteLine(ex);
 							await bot.SendHtml(callbackQuery.Message.Chat, $"""
-							Превышено время ожидания ответа на запрос. Пожалуйста, повторите попытку чуть позже.
+								😭 Превышено время ожидания ответа на запрос. Пожалуйста, повтори попытку чуть позже.
 
-							<code>Код необработанного запроса: {callbackQuery.Data}</code>
-							""");
+								<code>🔨 Код необработанного запроса: {callbackQuery.Data}</code>
+								""");
 						}
 						var splitStr = callbackQuery.Data.Split(' ');
 						if (splitStr.Length > 1)
@@ -1783,7 +1800,9 @@ static class Program
 
 						if (foundUser == null)
 						{
-							await EditOrSendMessage(callbackQuery.Message, "Вы не прошли регистрацию путём ввода /start, большая часть функций бота недоступна",
+							await EditOrSendMessage(callbackQuery.Message, """
+								💀 Упс, регистрация не была пройдена
+								""",
 								new InlineKeyboardButton[] { ("Зарегистрироваться", "/start") });
 							break;
 						}
@@ -1791,10 +1810,10 @@ static class Program
 						var splitStr = callbackQuery.Data.Split(' ');
 						if (splitStr.Length < 2)
 						{
-							await EditOrSendMessage(callbackQuery.Message, $"Ошибка при #{callbackQuery.Data} запросе: некорректный аргументов.", new InlineKeyboardButton[]
-							{
-											("Назад", "/places")
-							});
+							await EditOrSendMessage(callbackQuery.Message, $"💀 Упс, ошибка при запросе: некорректный аргумент #{callbackQuery.Data}.", new InlineKeyboardButton[]
+								{
+									("Назад", "/places")
+								});
 							throw new ArgumentException($"No command args in request {callbackQuery.Message.Text}");
 						}
 
@@ -1820,10 +1839,10 @@ static class Program
 										{
 											Console.WriteLine(ex);
 											await bot.SendHtml(callbackQuery.Message.Chat, $"""
-											Превышено время ожидания ответа на запрос. Пожалуйста, повторите попытку чуть позже.
+												😭 Превышено время ожидания ответа на запрос. Пожалуйста, повтори попытку чуть позже.
 
-											<tg-spoiler><code>Код необработанного запроса: {callbackQuery.Data}</code></tg-spoiler>
-											""");
+												<code>🔨 Код необработанного запроса: {callbackQuery.Data}</code>
+												""");
 										}
 										
 										await OnCommand("/admin", "chk", callbackQuery.Message);
@@ -1841,10 +1860,10 @@ static class Program
 										{
 											Console.WriteLine(ex);
 											await bot.SendHtml(callbackQuery.Message.Chat, $"""
-											Превышено время ожидания ответа на запрос. Пожалуйста, повторите попытку чуть позже.
+												😭 Превышено время ожидания ответа на запрос. Пожалуйста, повтори попытку чуть позже.
 
-											<tg-spoiler><code>Код необработанного запроса: {callbackQuery.Data}</code></tg-spoiler>
-											""");
+												<code>🔨 Код необработанного запроса: {callbackQuery.Data}</code>
+												""");
 										}
 										
 										await OnCommand("/admin", "chk", callbackQuery.Message);
@@ -1862,10 +1881,10 @@ static class Program
 										{
 											Console.WriteLine(ex);
 											await bot.SendHtml(callbackQuery.Message.Chat, $"""
-											Превышено время ожидания ответа на запрос. Пожалуйста, повторите попытку чуть позже.
+												😭 Превышено время ожидания ответа на запрос. Пожалуйста, повтори попытку чуть позже.
 
-											<tg-spoiler><code>Код необработанного запроса: {callbackQuery.Data}</code></tg-spoiler>
-											""");
+												<code>🔨 Код необработанного запроса: {callbackQuery.Data}</code>
+												""");
 										}
 										
 										await OnCommand("/admin", "chk", callbackQuery.Message);
@@ -1875,10 +1894,10 @@ static class Program
 									{
 										if (!char.IsLetter(splitStr[1][4]) || !int.TryParse(splitStr[1][5..splitStr[1].IndexOf('_')], out int locationReview) || !int.TryParse(splitStr[1][(splitStr[1].IndexOf('_') + 1)..], out int reviewIndex))
 										{
-											await EditOrSendMessage(callbackQuery.Message, "Ошибка при запросе: некорректный аргумент команды /admin cnf.", new InlineKeyboardButton[]
-											{
-											("Назад", "/places")
-											});
+											await EditOrSendMessage(callbackQuery.Message, $"💀 Упс, ошибка при запросе: некорректный аргумент команды /admin cnf.", new InlineKeyboardButton[]
+												{
+													("Назад", "/places")
+												});
 											throw new ArgumentException($"Invalid command args: {splitStr[1]}");
 										}
 
@@ -1902,10 +1921,10 @@ static class Program
 												}
 											default:
 												{
-													await EditOrSendMessage(callbackQuery.Message, $"Ошибка при #{callbackQuery.Data} запросе: некорректный аргументов.", new InlineKeyboardButton[]
-													{
-														("Назад", "/places")
-													});
+													await EditOrSendMessage(callbackQuery.Message, $"💀 Упс, ошибка при запросе: некорректный аргумент #{callbackQuery.Data}.", new InlineKeyboardButton[]
+														{
+															("Назад", "/places")
+														});
 													throw new ArgumentException($"Invalid command args: {splitStr[1]}");
 												}
 										}
@@ -1920,20 +1939,19 @@ static class Program
 											{
 												Console.WriteLine(ex);
 												await bot.SendHtml(callbackQuery.Message.Chat, $"""
-												Превышено время ожидания ответа на запрос. Пожалуйста, повторите попытку чуть позже.
+													😭 Превышено время ожидания ответа на запрос. Пожалуйста, повтори попытку чуть позже.
 
-												<tg-spoiler><code>Код необработанного запроса: {callbackQuery.Data}</code></tg-spoiler>
-												""");
+													<code>🔨 Код необработанного запроса: {callbackQuery.Data}</code>
+													""");
 											}
 
 											await OnCommand("/admin", $"delN-{splitStr[1][4..splitStr[1].IndexOf('_')]}_0", callbackQuery.Message);
 											break;
 										}
-
-										await EditOrSendMessage(callbackQuery.Message, $"Ошибка при попытке удалить отзыв на {placeOfReview.Name}", new InlineKeyboardButton[]
-										{
-											("Назад", $"/info {splitStr[1]}")
-										});
+										await EditOrSendMessage(callbackQuery.Message, $"💀 Упс, ошибка при запросе: не удалось удалить отзыв на {placeOfReview.Name}.", new InlineKeyboardButton[]
+											{
+												("Назад", $"/info {splitStr[1]}")
+											});
 										throw new ArgumentException($"Error while user {foundUser.UserID} trying to delete review on {placeOfReview.Name}");
 									}
 								case ("susG"):
@@ -1947,10 +1965,10 @@ static class Program
 										};
 										if (!long.TryParse(splitStr[1][5..], out long userID))
 										{
-											await EditOrSendMessage(callbackQuery.Message, $"Ошибка при попытке наложить замедление", new InlineKeyboardButton[]
-											{
-												("Назад", $"/admin banS--_0")
-											});
+											await EditOrSendMessage(callbackQuery.Message, $"💀 Упс, ошибка при запросе: не удалось наложить замедление.", new InlineKeyboardButton[]
+												{
+													("Назад", $"/admin banS--_0")
+												});
 											throw new ArgumentException($"Error while user {foundUser.UserID} trying to slow user");
 										}
 
@@ -1964,30 +1982,30 @@ static class Program
 											{
 												Console.WriteLine(ex);
 												await bot.SendHtml(callbackQuery.Message.Chat, $"""
-												Превышено время ожидания ответа на запрос. Пожалуйста, повторите попытку чуть позже.
+													😭 Превышено время ожидания ответа на запрос. Пожалуйста, повтори попытку чуть позже.
 
-												<tg-spoiler><code>Код необработанного запроса: {callbackQuery.Data}</code></tg-spoiler>
-												""");
+													<code>🔨 Код необработанного запроса: {callbackQuery.Data}</code>
+													""");
 											}
 
 											await OnCommand("/admin", $"banS--_0", callbackQuery.Message);
 											break;
 										}
 
-										await EditOrSendMessage(callbackQuery.Message, $"Ошибка при попытке наложить замедление на {userID}", new InlineKeyboardButton[]
-										{
-											("Назад", $"/admin banS--_0")
-										});
+										await EditOrSendMessage(callbackQuery.Message, $"💀 Упс, ошибка при запросе: не удалось наложить замедление на {userID}.", new InlineKeyboardButton[]
+											{
+												("Назад", $"/admin banS--_0")
+											});
 										throw new ArgumentException($"Error while user {foundUser.UserID} trying to slow user {userID}");
 									}
 								case ("susR"):
 									{
 										if (!long.TryParse(splitStr[1][4..], out long userID))
 										{
-											await EditOrSendMessage(callbackQuery.Message, $"Ошибка при попытке снять замедление", new InlineKeyboardButton[]
-											{
-												("Назад", $"/admin banSR_0")
-											});
+											await EditOrSendMessage(callbackQuery.Message, $"💀 Упс, ошибка при запросе: не удалось снять замедление.", new InlineKeyboardButton[]
+												{
+													("Назад", $"/admin banSR_0")
+												});
 											throw new ArgumentException($"Error while user {foundUser.UserID} trying remove slow from user");
 										}
 
@@ -2001,20 +2019,20 @@ static class Program
 											{
 												Console.WriteLine(ex);
 												await bot.SendHtml(callbackQuery.Message.Chat, $"""
-												Превышено время ожидания ответа на запрос. Пожалуйста, повторите попытку чуть позже.
+													😭 Превышено время ожидания ответа на запрос. Пожалуйста, повтори попытку чуть позже.
 
-												<tg-spoiler><code>Код необработанного запроса: {callbackQuery.Data}</code></tg-spoiler>
-												""");
+													<code>🔨 Код необработанного запроса: {callbackQuery.Data}</code>
+													""");
 											}
 
 											await OnCommand("/admin", $"banSR_0", callbackQuery.Message);
 											break;
 										}
 
-										await EditOrSendMessage(callbackQuery.Message, $"Ошибка при попытке снять замедление с {userID}", new InlineKeyboardButton[]
-										{
-											("Назад", $"/admin banSR_0")
-										});
+										await EditOrSendMessage(callbackQuery.Message, $"💀 Упс, ошибка при запросе: не удалось снять замедление с {userID}.", new InlineKeyboardButton[]
+											{
+												("Назад", $"/admin banSR_0")
+											});
 										throw new ArgumentException($"Error while user {foundUser.UserID} trying remove slow from user {userID}");
 									}
 								case ("banG"):
@@ -2028,10 +2046,10 @@ static class Program
 										};
 										if (!long.TryParse(splitStr[1][5..], out long userID))
 										{
-											await EditOrSendMessage(callbackQuery.Message, $"Ошибка при попытке заблокировать", new InlineKeyboardButton[]
-											{
-												("Назад", $"/admin banB--_0")
-											});
+											await EditOrSendMessage(callbackQuery.Message, $"💀 Упс, ошибка при запросе: не удалось заблокировать пользователя.", new InlineKeyboardButton[]
+												{
+													("Назад", $"/admin banB--_0")
+												});
 											throw new ArgumentException($"Error while user {foundUser.UserID} trying to slow user");
 										}
 
@@ -2045,17 +2063,17 @@ static class Program
 											{
 												Console.WriteLine(ex);
 												await bot.SendHtml(callbackQuery.Message.Chat, $"""
-												Превышено время ожидания ответа на запрос. Пожалуйста, повторите попытку чуть позже.
+													😭 Превышено время ожидания ответа на запрос. Пожалуйста, повтори попытку чуть позже.
 
-												<tg-spoiler><code>Код необработанного запроса: {callbackQuery.Data}</code></tg-spoiler>
-												""");
+													<code>🔨 Код необработанного запроса: {callbackQuery.Data}</code>
+													""");
 											}
 
 											await OnCommand("/admin", $"banB--_0", callbackQuery.Message);
 											break;
 										}
 
-										await EditOrSendMessage(callbackQuery.Message, $"Ошибка при попытке наложить замедление на {userID}", new InlineKeyboardButton[]
+										await EditOrSendMessage(callbackQuery.Message, $"💀 Упс, ошибка при запросе: не удалось наложить замедление на {userID}", new InlineKeyboardButton[]
 										{
 											("Назад", $"/admin banS--_0")
 										});
@@ -2065,7 +2083,7 @@ static class Program
 									{
 										if (!long.TryParse(splitStr[1][4..], out long userID))
 										{
-											await EditOrSendMessage(callbackQuery.Message, $"Ошибка при попытке снять блокировку", new InlineKeyboardButton[]
+											await EditOrSendMessage(callbackQuery.Message, $"💀 Упс, ошибка при запросе: не удалось снять блокировку", new InlineKeyboardButton[]
 											{
 												("Назад", $"/admin banBR_0")
 											});
@@ -2082,20 +2100,20 @@ static class Program
 											{
 												Console.WriteLine(ex);
 												await bot.SendHtml(callbackQuery.Message.Chat, $"""
-												Превышено время ожидания ответа на запрос. Пожалуйста, повторите попытку чуть позже.
+													😭 Превышено время ожидания ответа на запрос. Пожалуйста, повтори попытку чуть позже.
 
-												<tg-spoiler><code>Код необработанного запроса: {callbackQuery.Data}</code></tg-spoiler>
-												""");
+													<code>🔨 Код необработанного запроса: {callbackQuery.Data}</code>
+													""");
 											}
 
 											await OnCommand("/admin", $"banBR_0", callbackQuery.Message);
 											break;
 										}
 
-										await EditOrSendMessage(callbackQuery.Message, $"Ошибка при попытке снять блокировку с {userID}", new InlineKeyboardButton[]
-										{
-											("Назад", $"/admin banBR_0")
-										});
+										await EditOrSendMessage(callbackQuery.Message, $"💀 Упс, ошибка при запросе: не удалось снять блокировку с {userID}.", new InlineKeyboardButton[]
+												{
+													("Назад", $"/admin banBR_0")
+												});
 										throw new ArgumentException($"Error while user {foundUser.UserID} trying remove ban from user {userID}");
 									}
 								default:
@@ -2108,10 +2126,10 @@ static class Program
 
 						if (!char.IsLetter(splitStr[1][1]) || !int.TryParse(splitStr[1][2..splitStr[1].IndexOf('_')], out int index))
 						{
-							await EditOrSendMessage(callbackQuery.Message, $"Ошибка при #{callbackQuery.Data} запросе: некорректный аргументов.", new InlineKeyboardButton[]
-							{
-											("Назад", "/places")
-							});
+							await EditOrSendMessage(callbackQuery.Message, $"💀 Упс, ошибка при запросе: некорректный аргумент #{callbackQuery.Data}.", new InlineKeyboardButton[]
+								{
+									("Назад", "/places")
+								});
 							throw new ArgumentException($"Invalid command args: {splitStr[1]}");
 						}
 
@@ -2135,10 +2153,10 @@ static class Program
 								}
 							default:
 								{
-									await EditOrSendMessage(callbackQuery.Message, $"Ошибка при #{callbackQuery.Data} запросе: некорректный аргументов.", new InlineKeyboardButton[]
-									   {
-										   ("Назад", "/places")
-									   });
+									await EditOrSendMessage(callbackQuery.Message, $"💀 Упс, ошибка при запросе: некорректный аргумент #{callbackQuery.Data}.", new InlineKeyboardButton[]
+										{
+											("Назад", "/places")
+										});
 									throw new ArgumentException($"Invalid command args: {splitStr[1]}");
 								}
 						}
@@ -2159,17 +2177,17 @@ static class Program
 										{
 											Console.WriteLine(ex);
 											await bot.SendHtml(callbackQuery.Message.Chat, $"""
-											Превышено время ожидания ответа на запрос. Пожалуйста, повторите попытку чуть позже.
+												😭 Превышено время ожидания ответа на запрос. Пожалуйста, повтори попытку чуть позже.
 
-											<tg-spoiler><code>Код необработанного запроса: {callbackQuery.Data}</code></tg-spoiler>
-											""");
+												<code>🔨 Код необработанного запроса: {callbackQuery.Data}</code>
+												""");
 										}
 										
 										await OnCommand("/info", usersState[foundUser.UserID].ReferenceToPlace, callbackQuery.Message);
 									}
 									else
 									{
-										await EditOrSendMessage(callbackQuery.Message, $"Ошибка при попытке оставить отзыв: {usersState[foundUser.UserID].Rating}⭐️| {usersState[foundUser.UserID].Comment ?? "Комментарий отсутствует"}", new InlineKeyboardButton[]
+										await EditOrSendMessage(callbackQuery.Message, $"💀 Упс, ошибка при запросе: не удалось оставить отзыв: {usersState[foundUser.UserID].Rating}⭐️| {usersState[foundUser.UserID].Comment ?? "Комментарий отсутствует"}", new InlineKeyboardButton[]
 										{
 											("Назад", $"/info {usersState[foundUser.UserID].ReferenceToPlace}")
 										});
@@ -2183,13 +2201,13 @@ static class Program
 									if (!place.Reviews.Any(x => x.UserID == foundUser.UserID) && !AdminControl.ReviewCollector.Any(x => x.place == place && x.review.UserID == foundUser.UserID))
 									{
 										await EditOrSendMessage(callbackQuery.Message, $"""
-										Вы не можете удалить отзыв на {place.Name}
+										💀 Упс, ошибка! Не удалось уджалить отзыв на {place.Name}
 
-										Причина: Ваш отзыв не существует в системе
+										📑 Причина: отзыв не существует в системе
 										""", new InlineKeyboardButton[]
 										{
 											("Назад", $"/placeSelector {splitStr[1]}")
-										}, ParseMode.Html);
+										});
 										break;
 									}
 
@@ -2203,10 +2221,10 @@ static class Program
 										{
 											Console.WriteLine(ex);
 											await bot.SendHtml(callbackQuery.Message.Chat, $"""
-											Превышено время ожидания ответа на запрос. Пожалуйста, повторите попытку чуть позже.
+												😭 Превышено время ожидания ответа на запрос. Пожалуйста, повтори попытку чуть позже.
 
-											<tg-spoiler><code>Код необработанного запроса: {callbackQuery.Data}</code></tg-spoiler>
-											""");
+												<code>🔨 Код необработанного запроса: {callbackQuery.Data}</code>
+												""");
 										}
 										
 										await OnCommand("/info", splitStr[1], callbackQuery.Message);
@@ -2224,17 +2242,17 @@ static class Program
 										{
 											Console.WriteLine(ex);
 											await bot.SendHtml(callbackQuery.Message.Chat, $"""
-											Превышено время ожидания ответа на запрос. Пожалуйста, повторите попытку чуть позже.
+												😭 Превышено время ожидания ответа на запрос. Пожалуйста, повтори попытку чуть позже.
 
-											<tg-spoiler><code>Код необработанного запроса: {callbackQuery.Data}</code></tg-spoiler>
-											""");
+												<code>🔨 Код необработанного запроса: {callbackQuery.Data}</code>
+												""");
 										}
 
 										await OnCommand("/info", splitStr[1], callbackQuery.Message);
 										break;
 									}
 
-									await EditOrSendMessage(callbackQuery.Message, $"Ошибка при попытке удалить отзыв на {place.Name}", new InlineKeyboardButton[]
+									await EditOrSendMessage(callbackQuery.Message, $"💀 Упс, ошибка при попытке удалить отзыв на {place.Name}", new InlineKeyboardButton[]
 										{
 											("Назад", $"/info {splitStr[1]}")
 										});
@@ -2259,10 +2277,10 @@ static class Program
 									{
 										Console.WriteLine(ex);
 										await bot.SendHtml(callbackQuery.Message.Chat, $"""
-										Превышено время ожидания ответа на запрос. Пожалуйста, повторите попытку чуть позже.
+											😭 Превышено время ожидания ответа на запрос. Пожалуйста, повтори попытку чуть позже.
 
-										<tg-spoiler><code>Код необработанного запроса: {callbackQuery.Data}</code></tg-spoiler>
-										""");
+											<code>🔨 Код необработанного запроса: {callbackQuery.Data}</code>
+											""");
 									}
 
 									await OnCommand("/info", usersState[foundUser.UserID].ReferenceToPlace, callbackQuery.Message);
@@ -2287,10 +2305,10 @@ static class Program
 							{
 								Console.WriteLine(ex);
 								await bot.SendHtml(callbackQuery.Message.Chat, $"""
-								Превышено время ожидания ответа на запрос. Пожалуйста, повторите попытку чуть позже.
+									😭 Превышено время ожидания ответа на запрос. Пожалуйста, повтори попытку чуть позже.
 
-								<tg-spoiler><code>Код необработанного запроса: {callbackQuery.Data}</code></tg-spoiler>
-								""");
+									<code>🔨 Код необработанного запроса: {callbackQuery.Data}</code>
+									""");
 							}
 
 							if (foundUser == null)
