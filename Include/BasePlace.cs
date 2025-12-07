@@ -287,7 +287,7 @@ namespace OBED.Include
 
 			lock (reviewLock)
 			{
-				if (!Reviews.Any(x => x.UserID == review.UserID))
+				if (!Reviews.Any(x => x.UserID == review.UserID) && mod == 0)
 				{
 					if (Save(review,mod)) { Reviews.Add(review); }
 					return true;
@@ -299,7 +299,7 @@ namespace OBED.Include
 		{
 			lock (reviewLock)
 			{
-				if (!Reviews.Any(x => x.UserID == userID))
+				if (!Reviews.Any(x => x.UserID == userID) && mod == 0)
 				{
 					Review review = new Review(placeid, userID, rating, comment);
 
