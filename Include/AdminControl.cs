@@ -108,7 +108,7 @@ namespace OBED.Include
 				if (status)
 					ReviewCollector[index].place.AddReview(ReviewCollector[index].review,0);
 				else
-					ReviewCollector[index].place.AddReview(ReviewCollector[index].review, 2);
+					ReviewCollector[index].place.RemoveReviewFromBD(ReviewCollector[index].review);
 
 				ReviewCollector.RemoveAt(index);
 			}

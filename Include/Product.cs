@@ -36,25 +36,27 @@ namespace OBED.Include
             using (SqliteConnection connection = new SqliteConnection(dbConnectionString))
             {
                 connection.Open();
-                SqliteCommand command = new SqliteCommand();
-                command.Connection = connection;
-                CreateTableProducts(command);
-                if (IfProductExists(product))
+                using (var command = new SqliteCommand())
                 {
-                    return false;
+                    command.Connection = connection;
+                    CreateTableProducts(command);
+                    if (IfProductExists(product))
+                    {
+                        return false;
+                    }
+                    int pg = 0;
+                    if (product.Price.perGram) { pg = 1; }
+
+                    command.CommandText = $@"INSERT INTO Products(Place_id,Name,Value,perGram,Type) VALUES (@placeid,@name,@value,@pg,@type)";
+                    command.Parameters.Add(new SqliteParameter("@placeid", product.Place_id));
+                    command.Parameters.Add(new SqliteParameter("@name", product.Name));
+                    command.Parameters.Add(new SqliteParameter("@value", product.Price.value));
+                    command.Parameters.Add(new SqliteParameter("@pg", pg));
+                    command.Parameters.Add(new SqliteParameter("@type", (int)product.Type));
+                    int number = command.ExecuteNonQuery();
+                    Console.WriteLine($"Добавлено элементов: {number}");
+                    return true;
                 }
-                int pg = 0;
-                if (product.Price.perGram) { pg = 1; }
-                
-                command.CommandText = $@"INSERT INTO Products(Place_id,Name,Value,perGram,Type) VALUES (@placeid,@name,@value,@pg,@type)";
-                command.Parameters.Add(new SqliteParameter("@placeid", product.Place_id));
-                command.Parameters.Add(new SqliteParameter("@name", product.Name));
-                command.Parameters.Add(new SqliteParameter("@value", product.Price.value));
-                command.Parameters.Add(new SqliteParameter("@pg", pg));
-                command.Parameters.Add(new SqliteParameter("@type", (int) product.Type));
-                int number = command.ExecuteNonQuery();
-                Console.WriteLine($"Добавлено элементов: {number}");
-                return true;
             }
         }
 
@@ -79,23 +81,24 @@ namespace OBED.Include
             using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
             {
                 connection.Open();
-                var command = new SqliteCommand();
-                command.Connection = connection;
-                command.CommandText = $@"SELECT * FROM Products WHERE Place_id = @placeid";
-                command.Parameters.Add(new SqliteParameter("@placeid", placeid));
-                using(SqliteDataReader reader = command.ExecuteReader())
+                using (var command = new SqliteCommand())
                 {
-                    while (reader.Read())
+                    command.Connection = connection;
+                    command.CommandText = $@"SELECT * FROM Products WHERE Place_id = @placeid";
+                    command.Parameters.Add(new SqliteParameter("@placeid", placeid));
+                    using (SqliteDataReader reader = command.ExecuteReader())
                     {
-                        string name = reader.GetString(2);
-                        float value = reader.GetFloat(3);
-                        bool perGram = reader.GetInt32(4) != 0;
-                        ProductType type = (ProductType)reader.GetInt32(5);
-                        list.Add(new Product(placeid, name, type, (value, perGram)));
+                        while (reader.Read())
+                        {
+                            string name = reader.GetString(2);
+                            float value = reader.GetFloat(3);
+                            bool perGram = reader.GetInt32(4) != 0;
+                            ProductType type = (ProductType)reader.GetInt32(5);
+                            list.Add(new Product(placeid, name, type, (value, perGram)));
 
+                        }
                     }
                 }
-                connection.Close();
             }
             return list;
         }
@@ -105,14 +108,16 @@ namespace OBED.Include
             using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
             {
                 connection.Open();
-                SqliteCommand command = new SqliteCommand();
-                command.Connection = connection;
-                command.CommandText = $@"SELECT 1 FROM Products WHERE Name = @name AND Place_id = @placeid";
-                command.Parameters.Add(new SqliteParameter("@name", product.Name));
-                command.Parameters.Add(new SqliteParameter("@placeid", product.Place_id));
-                bool t = command.ExecuteScalar() != null;
-                connection.Close();
-                return t;
+                using (var command = new SqliteCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandText = $@"SELECT 1 FROM Products WHERE Name = @name AND Place_id = @placeid";
+                    command.Parameters.Add(new SqliteParameter("@name", product.Name));
+                    command.Parameters.Add(new SqliteParameter("@placeid", product.Place_id));
+                    bool t = command.ExecuteScalar() != null;
+                    connection.Close();
+                    return t;
+                }
             }
         }
     }

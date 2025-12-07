@@ -78,41 +78,43 @@ namespace OBED.Include
 			using (SqliteConnection connection = new SqliteConnection(dbConnectionString))
 			{
 				connection.Open();
-				var command = new SqliteCommand();
-				command.Connection = connection;
-				//Создание таблицы если её нету
-				CreateTableReviews(command);
-                if (IfUserHaveReviewOnPlace(review.UserID, review.Place_Id,out long? review_id))
+				using (var command = new SqliteCommand())
 				{
-					command.CommandText = @"UPDATE Reviews SET Comment = @com,Rating = @rating,Date = @date,OnMod = @mod WHERE Review_id = @reviewid";
-					if(review.Comment == null)
+					command.Connection = connection;
+					//Создание таблицы если её нету
+					CreateTableReviews(command);
+					if (IfUserHaveReviewOnPlace(review.UserID, review.Place_Id, out long? review_id, connection))
 					{
-						command.CommandText = @"UPDATE Reviews SET Rating = @rating,Date = @date WHERE Review_id = @reviewid";
+						command.CommandText = @"UPDATE Reviews SET Comment = @com,Rating = @rating,Date = @date,OnMod = @mod WHERE Review_id = @reviewid";
+						if (review.Comment == null)
+						{
+							command.CommandText = @"UPDATE Reviews SET Rating = @rating,Date = @date WHERE Review_id = @reviewid";
+						}
+						command.Parameters.Add(new SqliteParameter("@mod", mod));
+						command.Parameters.Add(new SqliteParameter("@com", review.Comment));
+						command.Parameters.Add(new SqliteParameter("@rating", review.Rating));
+						command.Parameters.Add(new SqliteParameter("@date", review.Date));
+						command.Parameters.Add(new SqliteParameter("@reviewid", review_id));
+						int idk = command.ExecuteNonQuery();
+						Console.WriteLine($"Кол-во добавленных элементов: {idk}");
+						return idk != 0;
 					}
-					command.Parameters.Add(new SqliteParameter("@mod", mod));
-					command.Parameters.Add(new SqliteParameter("@com", review.Comment));
-					command.Parameters.Add(new SqliteParameter("@rating", review.Rating));
-					command.Parameters.Add(new SqliteParameter("@date", review.Date));
-					command.Parameters.Add(new SqliteParameter("@reviewid", review_id));
-					int idk = command.ExecuteNonQuery();
-					Console.WriteLine($"Кол-во добавленных элементов: {idk}");
-					return idk != 0;
-				}
-				command.CommandText = 
-						@"INSERT INTO Reviews(Users_id,Place_id,Comment,Rating,Date) VALUES (@UserID,@Place,@comment,@Rating,@date)";
-				if (review.Comment == null)
-				{
 					command.CommandText =
-						@"INSERT INTO Reviews(Users_id,Place_id,Rating,Date) VALUES (@UserID,@Place,@Rating,@date)";
+							@"INSERT INTO Reviews(Users_id,Place_id,Comment,Rating,Date) VALUES (@UserID,@Place,@comment,@Rating,@date)";
+					if (review.Comment == null)
+					{
+						command.CommandText =
+							@"INSERT INTO Reviews(Users_id,Place_id,Rating,Date) VALUES (@UserID,@Place,@Rating,@date)";
+					}
+					command.Parameters.Add(new SqliteParameter("@comment", review.Comment));
+					command.Parameters.Add(new SqliteParameter("@UserID", review.UserID));
+					command.Parameters.Add(new SqliteParameter("@Rating", review.Rating));
+					command.Parameters.Add(new SqliteParameter("@Place", review.Place_Id));
+					command.Parameters.Add(new SqliteParameter("@date", review.Date));
+					int number = command.ExecuteNonQuery();
+					Console.WriteLine($"Кол-во добавленных элементов: {number}");
+					return number != 0;
 				}
-				command.Parameters.Add(new SqliteParameter("@comment", review.Comment));
-				command.Parameters.Add(new SqliteParameter("@UserID", review.UserID));
-				command.Parameters.Add(new SqliteParameter("@Rating", review.Rating));
-				command.Parameters.Add(new SqliteParameter("@Place", review.Place_Id));
-				command.Parameters.Add(new SqliteParameter("@date", review.Date));
-				int number = command.ExecuteNonQuery();
-				Console.WriteLine($"Кол-во добавленных элементов: {number}");
-				return number != 0;
 			}
 		}
 
@@ -140,23 +142,25 @@ namespace OBED.Include
 			using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
 			{
 				connection.Open();
-				var command = new SqliteCommand();
-				command.Connection = connection;
-				command.CommandText = $@"SELECT Place_id,Users_id,Comment,Rating,Date FROM Reviews WHERE Place_id = @Place_id AND Users_id = @UserID";
-				command.Parameters.Add(new SqliteParameter("@Place_id", Place_id));
-                command.Parameters.Add(new SqliteParameter("@UserID", UserID));
-                using (SqliteDataReader reader = command.ExecuteReader())
+				using (var command = new SqliteCommand())
 				{
-					while (reader.Read())
+					command.Connection = connection;
+					command.CommandText = $@"SELECT Place_id,Users_id,Comment,Rating,Date FROM Reviews WHERE Place_id = @Place_id AND Users_id = @UserID";
+					command.Parameters.Add(new SqliteParameter("@Place_id", Place_id));
+					command.Parameters.Add(new SqliteParameter("@UserID", UserID));
+					using (SqliteDataReader reader = command.ExecuteReader())
 					{
-						if (reader.HasRows)
+						while (reader.Read())
 						{
-							long id = reader.GetInt64(0);
-							long userid = reader.GetInt64(1);
-							string? comment = reader.IsDBNull(2) ? null : reader.GetString(2);
-							int rating = reader.GetInt32(3);
-							DateTime date = reader.GetDateTime(4);
-							review = new Review(id, userid, rating, comment, date);
+							if (reader.HasRows)
+							{
+								long id = reader.GetInt64(0);
+								long userid = reader.GetInt64(1);
+								string? comment = reader.IsDBNull(2) ? null : reader.GetString(2);
+								int rating = reader.GetInt32(3);
+								DateTime date = reader.GetDateTime(4);
+								review = new Review(id, userid, rating, comment, date);
+							}
 						}
 					}
 				}
@@ -174,21 +178,23 @@ namespace OBED.Include
             using (SqliteConnection connection = new SqliteConnection(dbConnectionString))
             {
                 connection.Open();
-                var command = new SqliteCommand();
-                command.Connection = connection;
-                command.CommandText = $@"SELECT Place_id FROM Places WHERE Name = @name AND Corpus = @corpus AND Floor = @floor AND Type = @type";
-				command.Parameters.Add(new SqliteParameter("@name", name));
-                command.Parameters.Add(new SqliteParameter("@corpus", corpus));
-                command.Parameters.Add(new SqliteParameter("@floor", floor));
-                command.Parameters.Add(new SqliteParameter("@type", type));
-                using (SqliteDataReader reader = command.ExecuteReader())
-                {
-					while (reader.Read())
+				using (var command = new SqliteCommand())
+				{
+					command.Connection = connection;
+					command.CommandText = $@"SELECT Place_id FROM Places WHERE Name = @name AND Corpus = @corpus AND Floor = @floor AND Type = @type";
+					command.Parameters.Add(new SqliteParameter("@name", name));
+					command.Parameters.Add(new SqliteParameter("@corpus", corpus));
+					command.Parameters.Add(new SqliteParameter("@floor", floor));
+					command.Parameters.Add(new SqliteParameter("@type", type));
+					using (SqliteDataReader reader = command.ExecuteReader())
 					{
+						while (reader.Read())
+						{
 							placeid = reader.GetInt64(0);
 							return placeid;
+						}
 					}
-                }
+				}
             }
             return placeid;
         }
@@ -198,59 +204,60 @@ namespace OBED.Include
 			using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
 			{
 				connection.Open();
-				var command = new SqliteCommand();
-				command.Connection = connection;
-				command.CommandText = $@"SELECT * FROM Places WHERE Type = @type";
-                command.Parameters.Add(new SqliteParameter("@type", type));
-                using (SqliteDataReader reader = command.ExecuteReader())
+				using (var command = new SqliteCommand())
 				{
-					switch (type)
+					command.Connection = connection;
+					command.CommandText = $@"SELECT * FROM Places WHERE Type = @type";
+					command.Parameters.Add(new SqliteParameter("@type", type));
+					using (SqliteDataReader reader = command.ExecuteReader())
 					{
-						case 1:
-							{
-								List<Buffet> list = [];
-								while (reader.Read())
+						switch (type)
+						{
+							case 1:
 								{
-									long placeid = reader.GetInt64(0);
-									string name = reader.GetString(1);
-									int corpus = reader.GetInt32(3);
-									string description = reader.GetString(4);
-									int floor = reader.GetInt32(5);
-									list.Add(new Buffet(placeid, name, corpus, floor, description, LoadAllReviews(placeid), Product.LoadAllProducts(placeid)));
+									List<Buffet> list = [];
+									while (reader.Read())
+									{
+										long placeid = reader.GetInt64(0);
+										string name = reader.GetString(1);
+										int corpus = reader.GetInt32(3);
+										string description = reader.GetString(4);
+										int floor = reader.GetInt32(5);
+										list.Add(new Buffet(placeid, name, corpus, floor, description, LoadAllReviews(placeid), Product.LoadAllProducts(placeid)));
+									}
+									ObjectLists.AddRangeList(list);
+									break;
 								}
-								ObjectLists.AddRangeList(list);
-                                break;
-							}
-						case 2:
-							{
-								List<Canteen> list = [];
-								while (reader.Read())
+							case 2:
 								{
-									long placeid = reader.GetInt64(0);
-									string name = reader.GetString(1);
-									int corpus = reader.GetInt32(3);
-									string description = reader.GetString(4);
-									int floor = reader.GetInt32(5);
-									list.Add(new Canteen(placeid, name, corpus, floor, description, LoadAllReviews(placeid), Product.LoadAllProducts(placeid)));
+									List<Canteen> list = [];
+									while (reader.Read())
+									{
+										long placeid = reader.GetInt64(0);
+										string name = reader.GetString(1);
+										int corpus = reader.GetInt32(3);
+										string description = reader.GetString(4);
+										int floor = reader.GetInt32(5);
+										list.Add(new Canteen(placeid, name, corpus, floor, description, LoadAllReviews(placeid), Product.LoadAllProducts(placeid)));
+									}
+									ObjectLists.AddRangeList(list);
+									break;
 								}
-								ObjectLists.AddRangeList(list);
-								break;
-                            }
-						case 3:
-							{
-								List<Grocery> list = [];
-								while (reader.Read())
+							case 3:
 								{
-									long placeid = reader.GetInt64(0);
-									string name = reader.GetString(1);
-									string description = reader.GetString(4);
-									list.Add(new Grocery(placeid, name, description, LoadAllReviews(placeid), Product.LoadAllProducts(placeid)));
+									List<Grocery> list = [];
+									while (reader.Read())
+									{
+										long placeid = reader.GetInt64(0);
+										string name = reader.GetString(1);
+										string description = reader.GetString(4);
+										list.Add(new Grocery(placeid, name, description, LoadAllReviews(placeid), Product.LoadAllProducts(placeid)));
+									}
+									ObjectLists.AddRangeList(list);
+									break;
 								}
-								ObjectLists.AddRangeList(list);
-								break;
-                            }
+						}
 					}
-					
 				}
 			}
         }
@@ -261,20 +268,22 @@ namespace OBED.Include
 			using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
 			{
 				connection.Open();
-                var command = new SqliteCommand();
-                command.Connection = connection;
-                command.CommandText = $@"SELECT * FROM Reviews WHERE Place_id = @pd AND OnMod = 0";
-                command.Parameters.Add(new SqliteParameter("@pd", pd));
-                using (SqliteDataReader reader = command.ExecuteReader())
+				using (var command = new SqliteCommand())
 				{
-					while (reader.Read())
+					command.Connection = connection;
+					command.CommandText = $@"SELECT * FROM Reviews WHERE Place_id = @pd AND OnMod = 0";
+					command.Parameters.Add(new SqliteParameter("@pd", pd));
+					using (SqliteDataReader reader = command.ExecuteReader())
 					{
-						long UserID = reader.GetInt64(1);
-						long Placeid = reader.GetInt64(2);
-						string? com = reader.IsDBNull(3) ? null : reader.GetString(3);
-						int rate = reader.GetInt32(4);
-						DateTime date = reader.GetDateTime(5);
-						list.Add(new Review(Placeid, UserID, rate, com, date));
+						while (reader.Read())
+						{
+							long UserID = reader.GetInt64(1);
+							long Placeid = reader.GetInt64(2);
+							string? com = reader.IsDBNull(3) ? null : reader.GetString(3);
+							int rate = reader.GetInt32(4);
+							DateTime date = reader.GetDateTime(5);
+							list.Add(new Review(Placeid, UserID, rate, com, date));
+						}
 					}
 				}
             }
@@ -330,36 +339,36 @@ namespace OBED.Include
 			using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
 			{
 				connection.Open();
-				var command = new SqliteCommand();
-				command.Connection = connection;
-				if(IfUserHaveReviewOnPlace(review.UserID,review.Place_Id,out long? Reviewid))
+				using (var command = new SqliteCommand())
 				{
-					command.CommandText = $@"UPDATE Reviews SET OnMod = 2 WHERE Review_id = @reviewid";
-					command.Parameters.Add(new SqliteParameter("@reviewid", Reviewid));
-					int number = command.ExecuteNonQuery();
-					return number != 0;
+					command.Connection = connection;
+					if (IfUserHaveReviewOnPlace(review.UserID, review.Place_Id, out long? Reviewid, connection))
+					{
+						command.CommandText = $@"UPDATE Reviews SET OnMod = 2 WHERE Review_id = @reviewid";
+						command.Parameters.Add(new SqliteParameter("@reviewid", Reviewid));
+						int number = command.ExecuteNonQuery();
+						return number != 0;
+					}
 				}
 				return false;
 			}
         }
 
 		public virtual Review? GetReview(long userID) => Reviews.FirstOrDefault(x => x.UserID == userID);
-        private static bool IfUserHaveReviewOnPlace(long UserID, long Place,out long? Review_id)
+        private static bool IfUserHaveReviewOnPlace(long UserID, long Place,out long? Review_id,SqliteConnection connection)
         {
-            using (SqliteConnection connection = new SqliteConnection(dbConnectionString))
-            {
-                connection.Open();
-                var command = new SqliteCommand();
-                command.Connection = connection;
+			using (var command = new SqliteCommand())
+			{
+				command.Connection = connection;
 
-                command.CommandText =
-                    $@"SELECT 1 FROM Reviews WHERE
-                    ""Users_id"" = @UserID AND ""Place_id"" = @place";
+				command.CommandText =
+						$@"SELECT 1 FROM Reviews WHERE
+                    ""Users_id"" = @UserID AND ""Place_id"" = @place AND ""OnMod"" != 2";
 				command.Parameters.Add(new SqliteParameter("@UserID", UserID));
-                command.Parameters.Add(new SqliteParameter("@place", Place));
+				command.Parameters.Add(new SqliteParameter("@place", Place));
 				Review_id = (long?)command.ExecuteScalar();
 				return Review_id != null;
-            }
+			}
         }
     }
 }

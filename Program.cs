@@ -2374,7 +2374,7 @@ class Program
 										break;
 									}
 									else if (AdminControl.ReviewCollector.Any(x => x.place == place && x.review.UserID == foundUser.UserID))
-									{
+									{ 
 										AdminControl.SetReviewStatus(false, AdminControl.ReviewCollector.FindIndex(x => x.place == place && x.review.UserID == foundUser.UserID));
 
 										try
@@ -2599,7 +2599,7 @@ class Program
                 	PRIMARY KEY(""Place_id"" AUTOINCREMENT)
                 );";
 			command.ExecuteNonQuery();
-			if (ifPlaceExists(corpus, floor, name))
+			if (ifPlaceExists(corpus, floor, name,connection))
 			{
 				return null;
 			}
@@ -2632,12 +2632,10 @@ class Program
 		command.ExecuteNonQuery();
 	}
 
-	private static bool ifPlaceExists(int corpus, int floor, string name)
+	private static bool ifPlaceExists(int corpus, int floor, string name,SqliteConnection connection)
 	{
-		using (var connection = new SqliteConnection(dbConnectionString))
+		using (var command = new SqliteCommand())
 		{
-			connection.Open();
-			var command = new SqliteCommand();
 			command.Connection = connection;
 			command.CommandText = $@"SELECT 1 FROM Places WHERE ""Corpus"" = @corpus AND ""Floor"" = @floor AND ""Name"" = @name";
 			command.Parameters.Add(new SqliteParameter("@corpus", corpus));
