@@ -19,33 +19,40 @@ namespace OBED.Include
 				using(SqliteCommand command = new SqliteCommand())
 				{
 					command.Connection = connection;
-					command.CommandText = @"SELECT * FROM Reviews JOIN Places WHERE OnMod = 1";
+					command.CommandText = @"SELECT * FROM Reviews JOIN Places ON Reviews.Place_id = Places.Place_id WHERE OnMod = 1";
 					using(SqliteDataReader reader =  command.ExecuteReader())
 					{
 						while (reader.Read())
 						{
-							long userid = reader.GetInt64(1);
-							long placeid = reader.GetInt64(2);
-							int rating = reader.GetInt32(4);
-							string? commment = reader.IsDBNull(3) ? null : reader.GetString(3);
-							DateTime time = reader.GetDateTime(5);
-							int type = reader.GetInt32(9);
-							Review review = new Review(placeid, userid, rating, commment, time);
+							long userid = reader.GetInt64(reader.GetOrdinal("Users_id"));
+							long placeid = reader.GetInt64(reader.GetOrdinal("Place_id"));
+							int rating = reader.GetInt32(reader.GetOrdinal("Rating"));
+							int commentOrdinal = reader.GetOrdinal("Comment");
+							string ? comment = reader.IsDBNull(commentOrdinal) ? null : reader.GetString(commentOrdinal);
+							DateTime time = reader.GetDateTime(reader.GetOrdinal("Date"));
+							int type = reader.GetInt32(reader.GetOrdinal("Type"));
+							Review review = new Review(placeid, userid, rating, comment, time);
 							switch (type)
 							{
 								case 1:
 									{
-										list.Add((review, ObjectLists.Buffets.First(x => x.Place_id == placeid)));
+										var place = ObjectLists.Buffets.FirstOrDefault(x => x.Place_id == placeid);
+										if (place != null)
+											list.Add((review, place));
 										break;
 									}
 								case 2:
 									{
-										list.Add((review, ObjectLists.Canteens.First(x => x.Place_id == placeid)));
+										var place = ObjectLists.Canteens.FirstOrDefault(x => x.Place_id == placeid);
+										if (place != null)
+											list.Add((review, place));
 										break;
 									}
 								case 3:
 									{
-										list.Add((review, ObjectLists.Groceries.First(x => x.Place_id == placeid)));
+										var place = ObjectLists.Groceries.FirstOrDefault(x => x.Place_id == placeid);
+										if (place != null)
+											list.Add((review, place));
 										break;
 									}
 							}
@@ -65,7 +72,7 @@ namespace OBED.Include
 
 			lock (adminControlLock)
 			{
-				if (!place.Reviews.Any(x => x.UserID == review.UserID) || !ReviewCollector.Any(x => x.review.UserID == review.UserID))
+				if (!place.Reviews.Any(x => x.UserID == review.UserID) && !ReviewCollector.Any(x => x.review.UserID == review.UserID))
 				{
 					place.Save(review,1);
 					ReviewCollector.Add((review, place));
@@ -82,7 +89,7 @@ namespace OBED.Include
 
 			lock (adminControlLock)
 			{
-				if (!place.Reviews.Any(x => x.UserID == userID) || !ReviewCollector.Any(x => x.review.UserID == userID))
+				if (!place.Reviews.Any(x => x.UserID == userID) && !ReviewCollector.Any(x => x.review.UserID == userID))
 				{
 					place.Save(new Review(place.Place_id,userID,rating,comment), 1);
 					ReviewCollector.Add((new Review(place.Place_id,userID, rating, comment), place));
