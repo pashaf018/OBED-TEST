@@ -1,12 +1,60 @@
-﻿using System.Xml.Linq;
+﻿using Microsoft.Data.Sqlite;
+using System.Xml.Linq;
 using Telegram.Bot.Types;
 
 namespace OBED.Include
 {
 	static class AdminControl
 	{
-		public static List<(Review review, BasePlace place)> ReviewCollector { get; private set; } = [];
+		public static List<(Review review, BasePlace place)> ReviewCollector { get; private set; } = CollectReviewsOnMod();
 		private static readonly object adminControlLock = new();
+
+		public static List<(Review review, BasePlace place)> CollectReviewsOnMod()
+		{
+			string dbConnectionString = "Data Source=OBED_DB.db";
+			List<(Review review, BasePlace place)> list = [];
+			using(SqliteConnection connection = new SqliteConnection(dbConnectionString))
+			{
+				connection.Open();
+				using(SqliteCommand command = new SqliteCommand())
+				{
+					command.Connection = connection;
+					command.CommandText = @"SELECT * FROM Reviews JOIN Places WHERE OnMod = 1";
+					using(SqliteDataReader reader =  command.ExecuteReader())
+					{
+						while (reader.Read())
+						{
+							long userid = reader.GetInt64(1);
+							long placeid = reader.GetInt64(2);
+							int rating = reader.GetInt32(4);
+							string? commment = reader.IsDBNull(3) ? null : reader.GetString(3);
+							DateTime time = reader.GetDateTime(5);
+							int type = reader.GetInt32(9);
+							Review review = new Review(placeid, userid, rating, commment, time);
+							switch (type)
+							{
+								case 1:
+									{
+										list.Add((review, ObjectLists.Buffets.First(x => x.Place_id == placeid)));
+										break;
+									}
+								case 2:
+									{
+										list.Add((review, ObjectLists.Canteens.First(x => x.Place_id == placeid)));
+										break;
+									}
+								case 3:
+									{
+										list.Add((review, ObjectLists.Groceries.First(x => x.Place_id == placeid)));
+										break;
+									}
+							}
+						}
+					}
+				}
+			}
+			return list;
+		}
 
 		public static bool AddReviewOnMod(BasePlace place, Review review)
 		{
